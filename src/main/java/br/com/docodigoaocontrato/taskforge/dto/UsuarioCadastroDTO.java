@@ -1,6 +1,7 @@
 package br.com.docodigoaocontrato.taskforge.dto;
 
-import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -21,5 +22,6 @@ public class UsuarioCadastroDTO {
     private String email;
 
     @NotBlank(message = "A senha é obrigatória")
+    @Size(min = 6, message = "A senha deve conter no mínimo 6 caracteres")
     private String senha;
 }
