@@ -35,6 +35,15 @@ public class TarefaService {
                 .map(tarefa -> toDto(tarefa));
     }
 
+    public Optional<TarefaDTO> buscarTarefaPorNome(String nome) {
+        Optional<TarefaDTO> tarefaPorNome = tarefaRepository.findByNome(nome)
+                .map(tarefa -> toDto(tarefa));
+        if(tarefaPorNome.isEmpty()){
+            return Optional.empty();
+        }
+        return tarefaPorNome;
+    }
+
     public TarefaDTO criarTarefa(TarefaDTO tarefaDTO) {
         Tarefa tarefa = toEntity(tarefaDTO);
         return toDto(tarefaRepository.save(tarefa));
@@ -66,4 +75,7 @@ public class TarefaService {
         return new Tarefa(tarefaDTO.getNome(),
                 tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
     }
+
+
+
 }
