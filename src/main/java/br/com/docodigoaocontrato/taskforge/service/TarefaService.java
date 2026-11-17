@@ -22,7 +22,7 @@ public class TarefaService {
         if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
-            tarefas = tarefaRepository.findByConcluida(!concluida);
+            tarefas = tarefaRepository.findByConcluida(concluida);
         }
 
         return tarefas.stream()
