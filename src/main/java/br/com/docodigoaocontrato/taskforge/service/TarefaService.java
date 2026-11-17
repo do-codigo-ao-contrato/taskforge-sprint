@@ -5,6 +5,7 @@ import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,12 +18,16 @@ public class TarefaService {
         this.tarefaRepository = tarefaRepository;
     }
 
-    public List<TarefaDTO> buscarTodos(Boolean concluida) {
+    public List<TarefaDTO> buscarTodos(Boolean concluida, String ordenar) {
         List<Tarefa> tarefas;
         if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
             tarefas = tarefaRepository.findByConcluida(!concluida);
+        }
+
+        if ("prioridade".equalsIgnoreCase(ordenar)) {
+            tarefas.sort(Comparator.comparing(Tarefa::getPrioridade).reversed());
         }
 
         return tarefas.stream()

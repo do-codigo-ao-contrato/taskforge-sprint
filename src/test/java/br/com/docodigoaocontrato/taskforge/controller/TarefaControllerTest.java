@@ -35,9 +35,9 @@ public class TarefaControllerTest {
         String token = login();
 
         mockMvc.perform(post("/tarefas")
-                .header("Authorization", token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
                         {
                             "nome": "",
                             "prioridade": 5,
@@ -63,6 +63,36 @@ public class TarefaControllerTest {
 
     }
 
+    @Test
+    void deveOrdenarPorPrioridadeQuandoParametroEnviado() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Tarefa A", "prioridade": 1, "concluida": false}
+                        """));
+
+        mockMvc.perform(post("/tarefas")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Tarefa B", "prioridade": 5, "concluida": false}
+                        """));
+
+        mockMvc.perform(get("/tarefas?ordenar=prioridade")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Tarefa B"))
+                .andExpect(jsonPath("$[1].nome").value("Tarefa A"));
+
+        mockMvc.perform(get("/tarefas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Tarefa A"));
+    }
+
     private String login() throws Exception {
         String usuarioCadastroDTO = """
                 {
@@ -83,8 +113,8 @@ public class TarefaControllerTest {
                 .content(usuarioCadastroDTO));
 
         String resposta = mockMvc.perform(post("/usuarios/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginDTO))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 

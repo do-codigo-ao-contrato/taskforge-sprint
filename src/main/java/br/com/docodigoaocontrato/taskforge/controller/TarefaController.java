@@ -30,8 +30,10 @@ public class TarefaController {
 
     @GetMapping
     public ResponseEntity<List<TarefaDTO>> listar(
-            @RequestParam(required = false) Boolean concluida) {
-        return ResponseEntity.ok(tarefaService.buscarTodos(concluida));
+            @RequestParam(required = false) Boolean concluida,
+            @RequestParam(required = false) String ordenar) {
+
+        return ResponseEntity.ok(tarefaService.buscarTodos(concluida, ordenar));
     }
 
     @GetMapping("/{id}")
