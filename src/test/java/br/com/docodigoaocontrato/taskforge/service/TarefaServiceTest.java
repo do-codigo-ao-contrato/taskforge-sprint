@@ -51,6 +51,18 @@ public class TarefaServiceTest {
     }
 
     @Test
+    void deveDelverUmaTarefaQuandoONomeExiste(){
+        // DADO que o banco nao "tem" o nome na tarefa
+        when(tarefaRepository.findByNome("java")).thenReturn(Optional.empty());
+
+        // QUANDO eu busco a tarefa 99
+        Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorNome("java");
+
+        // ENTAO nao vem nenhum resultado
+        assertTrue(resultado.isEmpty());
+    }
+
+    @Test
     void naoDeveApagarQuandoATarefaNaoExiste() {
         // DADO que o banco nao "tem" a tarefa 99
         when(tarefaRepository.existsById(99L)).thenReturn(false);
