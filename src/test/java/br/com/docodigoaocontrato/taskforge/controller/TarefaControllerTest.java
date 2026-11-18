@@ -60,7 +60,20 @@ public class TarefaControllerTest {
         mockMvc.perform(post("/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuario)).andExpect(status().isCreated());
+    }
 
+    @Test
+    void deveRetornar400QuandoSenhaMenos6Caracteres() throws Exception {
+        String usuario = """
+                {
+                    "nome": "TesteUsuario",
+                    "email": "testeUsuario@teste.com",
+                    "senha": "123"
+                }
+                """;
+        mockMvc.perform(post("/usuarios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(usuario)).andExpect(status().isBadRequest());
     }
 
     private String login() throws Exception {
