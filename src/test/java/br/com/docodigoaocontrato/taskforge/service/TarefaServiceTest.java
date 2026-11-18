@@ -9,7 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,6 +62,23 @@ public class TarefaServiceTest {
 
         // ENTAO nao vem nenhum resultado
         assertTrue(resultado.isEmpty());
+    }
+
+    @Test
+    void deveDevelverAprioridadeEditada(){
+        // DADO que o banco tem uma tarefa para editar
+        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false);
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
+        when(tarefaRepository.save(any(Tarefa.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // QUANDO eu edito a tarefa
+        Optional<TarefaDTO> tarefaAtualizada = tarefaService.atualizarTarefa(1L, tarefaNova);
+
+        // ENTAO tarefa muda o valor da prioridade
+        assertTrue(tarefaAtualizada.isPresent());
+        assertEquals(5, tarefaAtualizada.get().getPrioridade());
     }
 
     @Test
