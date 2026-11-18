@@ -51,6 +51,23 @@ public class TarefaServiceTest {
     }
 
     @Test
+    void deveDevelverAprioridadeEditada(){
+        // DADO que o banco tem uma tarefa para editar
+        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false);
+        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
+        when(tarefaRepository.save(any(Tarefa.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // QUANDO eu edito a tarefa
+        Optional<TarefaDTO> tarefaAtualizada = tarefaService.atualizarTarefa(1L, tarefaNova);
+
+        // ENTAO tarefa muda o valor da prioridade
+        assertTrue(tarefaAtualizada.isPresent());
+        assertEquals(5, tarefaAtualizada.get().getPrioridade());
+    }
+
+    @Test
     void naoDeveApagarQuandoATarefaNaoExiste() {
         // DADO que o banco nao "tem" a tarefa 99
         when(tarefaRepository.existsById(99L)).thenReturn(false);
