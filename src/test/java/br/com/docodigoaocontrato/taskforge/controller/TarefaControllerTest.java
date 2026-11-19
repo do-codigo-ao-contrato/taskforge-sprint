@@ -1,5 +1,6 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
+import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -91,5 +93,32 @@ public class TarefaControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         return "Bearer " + JsonPath.read(resposta, "$.token");
+    }
+
+    @Test
+    void deveRetornarDataCriacaoAoBuscarTarefaPorId() throws Exception {
+        String token = login();
+
+        String resposta = mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "nome": "Estudar",
+                            "prioridade": 5,
+                            "concluida": false
+                        }
+                        """))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Integer id = JsonPath.read(resposta, "$.id");
+
+
+
+        mockMvc.perform(get("/tarefas/" + id)
+                .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dataCriacao").isNotEmpty());
     }
 }
