@@ -120,4 +120,46 @@ public class TarefaControllerTest {
 
         return "Bearer " + JsonPath.read(resposta, "$.token");
     }
+
+    @Test
+    void deveRetornarEstatisticasDasTarefas() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Tarefa 1",
+                                    "prioridade": 3,
+                                    "concluida": true
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Tarefa 2",
+                                    "prioridade": 2,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/tarefas/estatisticas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").isNumber())
+                .andExpect(jsonPath("$.concluidas").isNumber())
+                .andExpect(jsonPath("$.pendentes").isNumber());
+    }
+
+    @Test
+    void deveRetornar401AoBuscarEstatisticasSemToken() throws Exception {
+        mockMvc.perform(get("/tarefas/estatisticas"))
+                .andExpect(status().isUnauthorized());
+    }
 }
