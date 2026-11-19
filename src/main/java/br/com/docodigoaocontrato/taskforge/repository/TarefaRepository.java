@@ -11,4 +11,6 @@ import java.util.List;
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
 
     List<Tarefa> findByConcluida(Boolean concluida);
+
+    long countByConcluida(boolean concluida);
 }
