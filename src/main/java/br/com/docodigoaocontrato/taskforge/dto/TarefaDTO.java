@@ -16,6 +16,7 @@ public class TarefaDTO {
 
     private Long id;
 
+    @NotBlank(message = "O nome não pode estar em branco")
     @Size(max = 10, message = "O nome deve ter no máximo 10 caracteres")
     private String nome;
 

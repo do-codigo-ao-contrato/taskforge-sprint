@@ -79,6 +79,23 @@ public class TarefaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuario)).andExpect(status().isBadRequest());
     }
+    @Test
+    void deveRetornar400QuandoNomeForEmBranco() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "nome": "   ",
+                            "prioridade": 2,
+                            "concluida": false
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
+    }
 
     private String login() throws Exception {
         String usuarioCadastroDTO = """
