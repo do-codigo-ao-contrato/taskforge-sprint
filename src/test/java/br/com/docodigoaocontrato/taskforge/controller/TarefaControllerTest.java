@@ -120,4 +120,40 @@ public class TarefaControllerTest {
 
         return "Bearer " + JsonPath.read(resposta, "$.token");
     }
+    @Test
+    void deveListarApenasTarefasAtrasadas() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "nome": "Atrasada",
+                            "prioridade": 1,
+                            "concluida": false,
+                            "dataPrazo": "2026-11-17" 
+                        }
+                        """));
+
+        mockMvc.perform(post("/tarefas")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "nome": "No Prazo",
+                            "prioridade": 1,
+                            "concluida": false,
+                            "dataPrazo": "2026-11-19"
+                        }
+                        """));
+
+        mockMvc.perform(get("/tarefas/atrasadas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Atrasada"))
+                .andExpect(jsonPath("$.length()").value(1));
+    }
+
 }
+

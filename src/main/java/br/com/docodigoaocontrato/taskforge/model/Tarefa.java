@@ -22,6 +22,7 @@ public class Tarefa {
     private String nome;
     private Integer prioridade;
     private Boolean concluida;
+    private java.time.LocalDate dataPrazo;
     private LocalDateTime dataCriacao;
 
     @PrePersist

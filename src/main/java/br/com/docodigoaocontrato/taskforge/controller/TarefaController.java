@@ -27,11 +27,16 @@ public class TarefaController {
         this.iaService = iaService;
     }
 
-
     @GetMapping
     public ResponseEntity<List<TarefaDTO>> listar(
-            @RequestParam(required = false) Boolean concluida) {
-        return ResponseEntity.ok(tarefaService.buscarTodos(concluida));
+            @RequestParam(required = false) Boolean concluida,
+            @RequestParam(required = false) String ordenar) {
+        return ResponseEntity.ok(tarefaService.buscarTodos(concluida, ordenar));
+    }
+
+    @GetMapping("/atrasadas")
+    public ResponseEntity<List<TarefaDTO>> listarAtrasadas() {
+        return ResponseEntity.ok(tarefaService.buscarAtrasadas());
     }
 
     @GetMapping("/{id}")
@@ -58,7 +63,7 @@ public class TarefaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TarefaDTO> atualizarTarefa(@PathVariable Long id, @RequestBody TarefaDTO tarefaDTO) {
+    public ResponseEntity<TarefaDTO> atualizarTarefa(@PathVariable Long id, @RequestBody TarefaDTO tarefaDTO){
         Optional<TarefaDTO> tarefaAtualizada = tarefaService.atualizarTarefa(id, tarefaDTO);
         if (tarefaAtualizada.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
