@@ -90,4 +90,22 @@ public class TarefaControllerTest {
 
         return "Bearer " + JsonPath.read(resposta, "$.token");
     }
+    @Test
+    void deveRetornar400QuandoPrioridadeForaDoIntervalo() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "nome": "Estudar",
+                            "prioridade": 6,
+                            "concluida": false
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.prioridade").value("A prioridade deve estar entre 1 e 5"));
+
+    }
 }
