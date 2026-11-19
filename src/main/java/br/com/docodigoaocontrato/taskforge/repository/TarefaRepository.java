@@ -1,11 +1,11 @@
 package br.com.docodigoaocontrato.taskforge.repository;
 
-import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 
 @Repository
 public interface TarefaRepository extends JpaRepository<Tarefa, Long> {
