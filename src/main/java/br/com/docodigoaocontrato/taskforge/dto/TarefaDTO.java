@@ -1,6 +1,10 @@
 package br.com.docodigoaocontrato.taskforge.dto;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +20,7 @@ public class TarefaDTO {
 
     private Long id;
 
+    @NotBlank(message = "O nome não pode estar em branco")
     @Size(max = 10, message = "O nome deve ter no máximo 10 caracteres")
     private String nome;
 
