@@ -48,6 +48,7 @@ public class TarefaService {
             Tarefa tarefa = tarefaRecuperada.get();
             tarefa.setNome(tarefaDTO.getNome());
             tarefa.setConcluida(tarefaDTO.getConcluida());
+            tarefa.setPrioridade(tarefaDTO.getPrioridade());
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
         return Optional.empty();
