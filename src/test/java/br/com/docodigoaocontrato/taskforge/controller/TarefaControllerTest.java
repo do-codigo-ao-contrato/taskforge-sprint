@@ -37,15 +37,15 @@ public class TarefaControllerTest {
         String token = login();
 
         mockMvc.perform(post("/tarefas")
-                .header("Authorization", token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "nome": "",
-                            "prioridade": 5,
-                            "concluida": false
-                        }
-                        """))
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.nome").value("O nome é obrigatório"));
     }
@@ -87,8 +87,8 @@ public class TarefaControllerTest {
                 .content(usuarioCadastroDTO));
 
         String resposta = mockMvc.perform(post("/usuarios/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginDTO))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -103,22 +103,44 @@ public class TarefaControllerTest {
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {
-                            "nome": "Estudar",
-                            "prioridade": 5,
-                            "concluida": false
-                        }
-                        """))
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
         Integer id = JsonPath.read(resposta, "$.id");
 
 
-
         mockMvc.perform(get("/tarefas/" + id)
-                .header("Authorization", token))
+                        .header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dataCriacao").isNotEmpty());
+
+    }
+
+    @Test
+    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception{
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/tarefas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
     }
 }
