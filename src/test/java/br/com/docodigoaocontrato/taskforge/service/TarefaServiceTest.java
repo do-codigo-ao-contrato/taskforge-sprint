@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,7 +55,7 @@ public class TarefaServiceTest {
     void deveDevelverAprioridadeEditada(){
         // DADO que o banco tem uma tarefa para editar
         Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false);
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
         when(tarefaRepository.save(any(Tarefa.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));

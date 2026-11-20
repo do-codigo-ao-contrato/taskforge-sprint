@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -72,7 +73,6 @@ public class TarefaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuario)).andExpect(status().isBadRequest());
     }
-
     @Test
     void deveRetornar400QuandoNomeForEmBranco() throws Exception {
         String token = login();
@@ -119,5 +119,52 @@ public class TarefaControllerTest {
         return "Bearer " + JsonPath.read(resposta, "$.token");
     }
 
+    @Test
+    void deveRetornarDataCriacaoAoBuscarTarefaPorId() throws Exception {
+        String token = login();
 
+        String resposta = mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Integer id = JsonPath.read(resposta, "$.id");
+
+
+        mockMvc.perform(get("/tarefas/" + id)
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dataCriacao").isNotEmpty());
+
+    }
+
+    @Test
+    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception{
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/tarefas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
+    }
 }
