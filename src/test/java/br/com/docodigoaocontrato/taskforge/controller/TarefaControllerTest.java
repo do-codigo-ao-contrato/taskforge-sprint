@@ -1,5 +1,6 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
+import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -35,15 +37,15 @@ public class TarefaControllerTest {
         String token = login();
 
         mockMvc.perform(post("/tarefas")
-                .header("Authorization", token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "nome": "",
-                            "prioridade": 5,
-                            "concluida": false
-                        }
-                        """))
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.nome").value("O nome é obrigatório"));
     }
@@ -60,7 +62,37 @@ public class TarefaControllerTest {
         mockMvc.perform(post("/usuarios")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuario)).andExpect(status().isCreated());
+    }
 
+    @Test
+    void deveRetornar400QuandoSenhaMenos6Caracteres() throws Exception {
+        String usuario = """
+                {
+                    "nome": "TesteUsuario",
+                    "email": "testeUsuario@teste.com",
+                    "senha": "123"
+                }
+                """;
+        mockMvc.perform(post("/usuarios")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(usuario)).andExpect(status().isBadRequest());
+    }
+    @Test
+    void deveRetornar400QuandoNomeForEmBranco() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {
+                            "nome": "   ",
+                            "prioridade": 2,
+                            "concluida": false
+                        }
+                        """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
     }
 
     private String login() throws Exception {
@@ -83,8 +115,8 @@ public class TarefaControllerTest {
                 .content(usuarioCadastroDTO));
 
         String resposta = mockMvc.perform(post("/usuarios/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginDTO))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -107,5 +139,54 @@ public class TarefaControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.prioridade").value("A prioridade deve estar entre 1 e 5"));
 
+    }
+
+    @Test
+    void deveRetornarDataCriacaoAoBuscarTarefaPorId() throws Exception {
+        String token = login();
+
+        String resposta = mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Integer id = JsonPath.read(resposta, "$.id");
+
+
+        mockMvc.perform(get("/tarefas/" + id)
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dataCriacao").isNotEmpty());
+
+    }
+
+    @Test
+    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception{
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/tarefas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
     }
 }

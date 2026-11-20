@@ -50,6 +50,6 @@ public class UsuarioService {
     }
 
     private UsuarioDTO toDto(Usuario entity) {
-        return new UsuarioDTO(entity.getId(), entity.getNome(), entity.getEmail(), entity.getSenha());
+        return new UsuarioDTO(entity.getId(), entity.getNome(), entity.getEmail());
     }
 }
