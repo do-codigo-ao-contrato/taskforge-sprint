@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,6 +24,8 @@ public class Tarefa {
     private Integer prioridade;
     private Boolean concluida;
     private LocalDateTime dataCriacao;
+
+    private LocalDate dataPrazo; // <-- AQUI: Adicionado o campo que o Repository estava pedindo
 
     @PrePersist
     public void aoCriar() {
