@@ -53,6 +53,7 @@ public class TarefaService {
             Tarefa tarefa = tarefaRecuperada.get();
             tarefa.setNome(tarefaDTO.getNome());
             tarefa.setConcluida(tarefaDTO.getConcluida());
+            tarefa.setPrioridade(tarefaDTO.getPrioridade());
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
         return Optional.empty();
@@ -65,7 +66,7 @@ public class TarefaService {
 
     private TarefaDTO toDto(Tarefa tarefa) {
         return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida());
+                tarefa.getPrioridade(), tarefa.getConcluida(), tarefa.getDataCriacao());
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
