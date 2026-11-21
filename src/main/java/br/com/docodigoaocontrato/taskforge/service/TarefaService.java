@@ -32,7 +32,7 @@ public class TarefaService {
         if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
-            tarefas = tarefaRepository.findByConcluida(!concluida);
+            tarefas = tarefaRepository.findByConcluida(concluida);
         }
 
         return tarefas.stream()
@@ -73,7 +73,7 @@ public class TarefaService {
                 .toList();
 
         return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida(), comentarios);
+                tarefa.getPrioridade(), tarefa.getConcluida(), tarefa.getDataCriacao());
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
