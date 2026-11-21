@@ -73,17 +73,14 @@ public class TarefaService {
                 .toList();
 
         return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida(), tarefa.getDataCriacao());
+                tarefa.getPrioridade(), tarefa.getConcluida(), comentarios, tarefa.getDataCriacao());
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
-        return new Tarefa(tarefaDTO.getNome(),
-                tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
+        return new Tarefa(tarefaDTO.getNome(), tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
     }
 
     private ComentarioDTO comentarioToDto(Comentario comentario) {
-        return new ComentarioDTO(comentario.getId(), comentario.getDescricao(),
-                comentario.getAutor()
-        );
+        return new ComentarioDTO(comentario.getId(), comentario.getDescricao(), comentario.getAutor());
     }
 }

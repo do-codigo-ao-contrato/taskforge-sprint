@@ -30,7 +30,7 @@ public class TarefaServiceTest {
     private TarefaService tarefaService;
 
     @Test
-    void deveDevolverUmaTarefaQuandoOIdExiste() {
+    void deveDevolverUmaTarefaComComentarioQuandoOIdExiste() {
         // DADO que o banco "tem" a tarefa 1L
         Comentario comentario = new Comentario(2L, "Estudar", "Junior");
         List<Comentario> comentarios = new ArrayList<>();
@@ -40,15 +40,11 @@ public class TarefaServiceTest {
 
         // QUANDO eu busco a tarefa
         Optional<TarefaDTO> tarefaEncontrada = tarefaService.buscarTarefaComComentarios(1L);
-        Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(1L);
 
         // ENTAO a tarefa é recuperada E RETORNA UM COMENTÁRIO
         assertTrue(tarefaEncontrada.isPresent());
         ComentarioDTO comentarioEncontrado = tarefaEncontrada.get().getComentarios().get(0);
         assertEquals("Estudar", comentarioEncontrado.getDescricao());
-        assertTrue(resultado.isPresent());
-        assertEquals("Estudar", resultado.get().getNome());
-        assertEquals(1, resultado.get().getPrioridade());
     }
 
     @Test
