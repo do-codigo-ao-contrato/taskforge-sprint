@@ -36,7 +36,6 @@ public class TarefaServiceTest {
         List<Comentario> comentarios = new ArrayList<>();
         comentarios.add(comentario);
         Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, comentarios);
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
 
         // QUANDO eu busco a tarefa
@@ -67,7 +66,7 @@ public class TarefaServiceTest {
     @Test
     void deveDevelverAprioridadeEditada(){
         // DADO que o banco tem uma tarefa para editar
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
+        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, new ArrayList<>());
         TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
         when(tarefaRepository.save(any(Tarefa.class)))
@@ -83,7 +82,7 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
-        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
+        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true, new ArrayList<>());
         when(tarefaRepository.findByConcluida(true))
                 .thenReturn(List.of(tarefaConcluida));
 
@@ -96,7 +95,7 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasPendentesQuandoFiltroForFalse() {
-        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false);
+        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false, new ArrayList<>());
         when(tarefaRepository.findByConcluida(false))
                 .thenReturn(List.of(tarefaPendente));
 
