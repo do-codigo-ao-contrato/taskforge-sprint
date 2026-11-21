@@ -14,7 +14,7 @@ import java.util.Optional;
 public class ComentarioController {
 
     private final ComentarioService comentarioService;
-
+    List<ComentarioDTO> comentarios;
     public ComentarioController(ComentarioService comentarioService) {
         this.comentarioService = comentarioService;
     }
@@ -33,11 +33,11 @@ public class ComentarioController {
         return ResponseEntity.status(HttpStatus.OK).body(comentarioDTO.get());
     }
 
-    @PostMapping
-    public ResponseEntity<ComentarioDTO> criar(@RequestBody ComentarioDTO comentarioDTO) {
+    @PostMapping("/{id}/comentarios")
+    public ResponseEntity<Optional<ComentarioDTO>> criar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(comentarioService.criarComentario(comentarioDTO));
+                .body(comentarioService.criarComentario(id ,comentarioDTO));
     }
 
     @PutMapping("/{id}")

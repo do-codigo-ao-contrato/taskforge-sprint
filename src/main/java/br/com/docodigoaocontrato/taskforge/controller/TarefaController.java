@@ -1,5 +1,6 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.service.IaService;
 import br.com.docodigoaocontrato.taskforge.service.TarefaService;
@@ -19,19 +20,29 @@ import java.util.Optional;
 @Tag(name = "Tarefas", description = "Gerenciador de tarefas")
 public class TarefaController {
 
+
     private final TarefaService tarefaService;
     private final IaService iaService;
+    List<ComentarioDTO> comentarios;
 
     public TarefaController(TarefaService tarefaService, IaService iaService) {
         this.tarefaService = tarefaService;
         this.iaService = iaService;
     }
 
-
     @GetMapping
     public ResponseEntity<List<TarefaDTO>> listar(
             @RequestParam(required = false) Boolean concluida) {
         return ResponseEntity.ok(tarefaService.buscarTodos(concluida));
+    }
+
+    @GetMapping("/{id}/comentarios")
+    public ResponseEntity<TarefaDTO> buscarTarefaComComentarios(@PathVariable Long id) {
+        Optional<TarefaDTO> tarefaComComentario = tarefaService.buscarTarefaComComentarios(id);
+        if (tarefaComComentario.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(tarefaComComentario.get());
     }
 
     @GetMapping("/{id}")
@@ -58,7 +69,7 @@ public class TarefaController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TarefaDTO> atualizarTarefa(@PathVariable Long id, @RequestBody TarefaDTO tarefaDTO){
+    public ResponseEntity<TarefaDTO> atualizarTarefa(@PathVariable Long id, @RequestBody TarefaDTO tarefaDTO) {
         Optional<TarefaDTO> tarefaAtualizada = tarefaService.atualizarTarefa(id, tarefaDTO);
         if (tarefaAtualizada.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

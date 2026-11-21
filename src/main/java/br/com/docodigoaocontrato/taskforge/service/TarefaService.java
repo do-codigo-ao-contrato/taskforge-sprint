@@ -1,6 +1,8 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,14 @@ public class TarefaService {
 
     public TarefaService(TarefaRepository tarefaRepository) {
         this.tarefaRepository = tarefaRepository;
+    }
+
+    public Optional<TarefaDTO> buscarTarefaComComentarios(Long id) {
+        Optional<TarefaDTO> tarefaComComentario = tarefaRepository.findById(id).map(tarefa -> toDto(tarefa));
+        if (tarefaComComentario.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(tarefaComComentario.get());
     }
 
     public List<TarefaDTO> buscarTodos(Boolean concluida) {
@@ -57,12 +67,23 @@ public class TarefaService {
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {
+        List<ComentarioDTO> comentarios = tarefa.getComentarios()
+                .stream()
+                .map(this::comentarioToDto)
+                .toList();
+
         return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida());
+                tarefa.getPrioridade(), tarefa.getConcluida(), comentarios);
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
         return new Tarefa(tarefaDTO.getNome(),
                 tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
+    }
+
+    private ComentarioDTO comentarioToDto(Comentario comentario) {
+        return new ComentarioDTO(comentario.getId(), comentario.getDescricao(),
+                comentario.getAutor()
+        );
     }
 }

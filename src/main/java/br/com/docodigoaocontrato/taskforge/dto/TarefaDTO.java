@@ -1,10 +1,13 @@
 package br.com.docodigoaocontrato.taskforge.dto;
 
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,4 +27,6 @@ public class TarefaDTO {
 
     @NotNull(message = "Status de conclusão é obrigatório")
     private Boolean concluida;
+
+    private List<ComentarioDTO> comentarios;
 }
