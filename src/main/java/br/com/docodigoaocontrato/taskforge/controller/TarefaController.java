@@ -65,6 +65,7 @@ public class TarefaController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(tarefaAtualizada.get());
     }
+
     @PatchMapping("/{id}/concluir")
     public ResponseEntity<TarefaDTO> concluirTarefa(@PathVariable Long id) {
         Optional<TarefaDTO> tarefaConcluida = tarefaService.concluirTarefa(id);
@@ -73,7 +74,7 @@ public class TarefaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(tarefaConcluida.get());
+        return ResponseEntity.ok(tarefaConcluida.get());
     }
 
     @DeleteMapping("/{id}")
