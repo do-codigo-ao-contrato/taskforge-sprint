@@ -1,14 +1,13 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
-import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
-import br.com.docodigoaocontrato.taskforge.model.Comentario;
-import br.com.docodigoaocontrato.taskforge.model.Tarefa;
-import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
+import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 
 @Service
 public class ComentarioService {
@@ -41,6 +40,7 @@ public class ComentarioService {
         if (comentarioRecuperado.isPresent()) {
             Comentario comentario = comentarioRecuperado.get();
             comentario.setDescricao(comentarioDTO.getDescricao());
+            comentario.setAutor(comentarioDTO.getAutor());
             return Optional.of(toDto(comentarioRepository.save(comentario)));
         }
         return Optional.empty();
