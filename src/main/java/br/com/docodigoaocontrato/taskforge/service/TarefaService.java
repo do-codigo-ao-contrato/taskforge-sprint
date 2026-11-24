@@ -53,9 +53,13 @@ public class TarefaService {
     }
 
     public boolean deletarTarefa(Long id) {
-        tarefaRepository.deleteById(id);
-        return true;
+        if (tarefaRepository.existsById(id)){
+            tarefaRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
+
 
     private TarefaDTO toDto(Tarefa tarefa) {
         return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
