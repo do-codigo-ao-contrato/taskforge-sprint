@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TarefaControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;  // SIMULA um POSTMAN
+    private MockMvc mockMvc;
 
     @Test
     void deveRetornarStatus401QuandoNaoTemToken() throws Exception {
