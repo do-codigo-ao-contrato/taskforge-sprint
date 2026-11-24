@@ -25,7 +25,7 @@ public class Tarefa {
     private Boolean concluida;
     private LocalDateTime dataCriacao;
 
-    private LocalDate dataPrazo; // <-- AQUI: Adicionado o campo que o Repository estava pedindo
+    private LocalDate dataPrazo; 
 
     @PrePersist
     public void aoCriar() {
