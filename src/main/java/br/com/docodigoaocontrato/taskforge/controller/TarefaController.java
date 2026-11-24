@@ -2,6 +2,7 @@ package br.com.docodigoaocontrato.taskforge.controller;
 
 import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.service.IaService;
 import br.com.docodigoaocontrato.taskforge.service.TarefaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,6 +58,12 @@ public class TarefaController {
     public ResponseEntity<TarefaDTO> criarTarefa(@Valid @RequestBody TarefaDTO tarefaDTO) {
         TarefaDTO tarefaCriada = tarefaService.criarTarefa(tarefaDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(tarefaCriada);
+    }
+
+    @Operation(summary = "Obter estatísticas das tarefas")
+    @GetMapping("/estatisticas")
+    public ResponseEntity<TarefaEstatisticasDTO> obterEstatisticas() {
+        return ResponseEntity.ok(tarefaService.obterEstatisticas());
     }
 
     @PostMapping("/sugerir-descricao")

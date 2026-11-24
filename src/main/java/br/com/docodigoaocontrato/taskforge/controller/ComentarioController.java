@@ -20,8 +20,9 @@ public class ComentarioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ComentarioDTO>> listarTodos() {
-        return ResponseEntity.ok(comentarioService.listarTodos());
+    public ResponseEntity<List<ComentarioDTO>> listarTodos(
+            @RequestParam(required = false) String autor) {
+        return ResponseEntity.ok(comentarioService.listarTodos(autor));
     }
 
     @GetMapping("/{id}")

@@ -2,6 +2,7 @@ package br.com.docodigoaocontrato.taskforge.service;
 
 import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
@@ -107,7 +108,26 @@ public class TarefaServiceTest {
     }
 
     @Test
+    void deveObterEstatisticasDasTarefas() {
+        when(tarefaRepository.count()).thenReturn(5L);
+        when(tarefaRepository.countByConcluida(true)).thenReturn(3L);
+        when(tarefaRepository.countByConcluida(false)).thenReturn(2L);
+
+        TarefaEstatisticasDTO estatisticas = tarefaService.obterEstatisticas();
+
+        assertEquals(5L, estatisticas.getTotal());
+        assertEquals(3L, estatisticas.getConcluidas());
+        assertEquals(2L, estatisticas.getPendentes());
+
+        verify(tarefaRepository, times(1)).count();
+        verify(tarefaRepository, times(1)).countByConcluida(true);
+        verify(tarefaRepository, times(1)).countByConcluida(false);
+    }
+
+    @Test
     void deveApagarTarefaConformeImplementacaoAtualDoService() {
+        when(tarefaRepository.existsById(99L)).thenReturn(true);
+
         boolean apagada = tarefaService.deletarTarefa(99L);
 
         assertTrue(apagada);
