@@ -42,7 +42,7 @@ public class TarefaControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
+                .andExpect(jsonPath("$.campos.nome").value("O nome é obrigatório"));
     }
 
     @Test
