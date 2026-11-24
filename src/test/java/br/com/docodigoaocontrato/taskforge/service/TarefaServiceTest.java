@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,7 +40,7 @@ public class TarefaServiceTest {
     }
 
     @Test
-    void deveDevolverVazioQuandoOIdNaoExiste(){
+    void deveDevolverVazioQuandoOIdNaoExiste() {
         // DADO que o banco nao "tem" a tarefa 99
         when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -72,7 +71,7 @@ public class TarefaServiceTest {
         when(tarefaRepository.findByConcluida(true))
                 .thenReturn(List.of(tarefaConcluida));
 
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(true);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(true, null);
 
         assertEquals(1, resultado.size());
         assertTrue(resultado.get(0).getConcluida());
@@ -85,9 +84,22 @@ public class TarefaServiceTest {
         when(tarefaRepository.findByConcluida(false))
                 .thenReturn(List.of(tarefaPendente));
 
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(false);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(false, null);
 
         assertEquals(1, resultado.size());
         assertFalse(resultado.get(0).getConcluida());
         verify(tarefaRepository).findByConcluida(false);
     }
+
+    @Test
+    void deveBuscarTarefasPorNome() {
+        Tarefa tarefaRepositorio = new Tarefa(2L, "estudar", 2, false);
+        when(tarefaRepository.findByNomeContainingIgnoreCase("estudar"))
+                .thenReturn(List.of(tarefaRepositorio));
+
+        List<TarefaDTO> tarefaBuscada = tarefaService.buscarTodos(null, "estudar");
+
+        assertEquals(2L, tarefaBuscada.get(0).getId());
+        assertEquals("estudar", tarefaBuscada.get(0).getNome());
+    }
+}

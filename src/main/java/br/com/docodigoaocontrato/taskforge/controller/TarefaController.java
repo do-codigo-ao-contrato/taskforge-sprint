@@ -29,23 +29,15 @@ public class TarefaController {
 
     @GetMapping
     public ResponseEntity<List<TarefaDTO>> listar(
-            @RequestParam(required = false) Boolean concluida) {
-        return ResponseEntity.ok(tarefaService.buscarTodos(concluida));
+            @RequestParam(required = false) Boolean concluida,
+            @RequestParam(required = false) String busca) {
+        return ResponseEntity.ok(tarefaService.buscarTodos(concluida, busca));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TarefaDTO> buscarTarefaPorId(@PathVariable Long id) {
         Optional<TarefaDTO> tarefaDTO = tarefaService.buscarTarefaPorId(id);
         if (tarefaDTO.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(tarefaDTO.get());
-    }
-
-    @GetMapping("/nome/{nome}")
-    public ResponseEntity<TarefaDTO> buscarTarefaPorNome(@PathVariable String nome){
-        Optional<TarefaDTO> tarefaDTO = tarefaService.buscarTarefaPorNome(nome);
-        if(tarefaDTO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.status(HttpStatus.OK).body(tarefaDTO.get());

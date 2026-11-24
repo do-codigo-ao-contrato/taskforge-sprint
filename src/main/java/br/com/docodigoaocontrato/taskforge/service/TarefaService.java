@@ -17,9 +17,12 @@ public class TarefaService {
         this.tarefaRepository = tarefaRepository;
     }
 
-    public List<TarefaDTO> buscarTodos(Boolean concluida) {
+    public List<TarefaDTO> buscarTodos(Boolean concluida, String busca) {
         List<Tarefa> tarefas;
-        if (concluida == null) {
+        if (busca != null && !busca.isBlank()) {
+            tarefas = tarefaRepository.findByNomeContainingIgnoreCase(busca);
+        }
+        else if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
             tarefas = tarefaRepository.findByConcluida(concluida);
@@ -33,15 +36,6 @@ public class TarefaService {
     public Optional<TarefaDTO> buscarTarefaPorId(Long id) {
         return tarefaRepository.findById(id)
                 .map(tarefa -> toDto(tarefa));
-    }
-
-    public Optional<TarefaDTO> buscarTarefaPorNome(String nome) {
-        Optional<TarefaDTO> tarefaPorNome = tarefaRepository.findByNome(nome)
-                .map(tarefa -> toDto(tarefa));
-        if(tarefaPorNome.isEmpty()){
-            return Optional.empty();
-        }
-        return tarefaPorNome;
     }
 
     public TarefaDTO criarTarefa(TarefaDTO tarefaDTO) {
