@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;       // <--- IMPORT ADICIONADO AQUI
+import java.time.LocalDate;      
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,7 +24,7 @@ public class Tarefa {
     private Integer prioridade;
     private Boolean concluida;
 
-    private LocalDate dataPrazo; // <--- NOME QUALIFICADO REMOVIDO AQUI
+    private LocalDate dataPrazo; 
 
     private LocalDateTime dataCriacao;
 
