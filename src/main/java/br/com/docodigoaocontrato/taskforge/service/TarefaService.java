@@ -24,7 +24,7 @@ public class TarefaService {
         if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
-            tarefas = tarefaRepository.findByConcluida(!concluida);
+            tarefas = tarefaRepository.findByConcluida(concluida);
         }
 
         if ("prioridade".equalsIgnoreCase(ordenar)) {
@@ -61,20 +61,31 @@ public class TarefaService {
             Tarefa tarefa = tarefaRecuperada.get();
             tarefa.setNome(tarefaDTO.getNome());
             tarefa.setConcluida(tarefaDTO.getConcluida());
+            tarefa.setPrioridade(tarefaDTO.getPrioridade());
             tarefa.setDataPrazo(tarefaDTO.getDataPrazo());
+
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
         return Optional.empty();
     }
 
     public boolean deletarTarefa(Long id) {
-        tarefaRepository.deleteById(id);
-        return true;
+        if (tarefaRepository.existsById(id)){
+            tarefaRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {
-        return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida(), tarefa.getDataPrazo());
+        return new TarefaDTO(
+                tarefa.getId(),
+                tarefa.getNome(),
+                tarefa.getPrioridade(),
+                tarefa.getConcluida(),
+                tarefa.getDataPrazo(),
+                tarefa.getDataCriacao()
+        );
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {

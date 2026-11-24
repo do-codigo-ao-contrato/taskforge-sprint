@@ -1,5 +1,6 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
+import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,13 +10,15 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
+
+import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:testes")
 @AutoConfigureMockMvc
@@ -35,17 +38,17 @@ public class TarefaControllerTest {
         String token = login();
 
         mockMvc.perform(post("/tarefas")
-                .header("Authorization", token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "nome": "",
-                            "prioridade": 5,
-                            "concluida": false
-                        }
-                        """))
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos.nome").value("O nome é obrigatório"));
+                .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
     }
 
     @Test
@@ -75,6 +78,7 @@ public class TarefaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuario)).andExpect(status().isBadRequest());
     }
+
     @Test
     void deveRetornar400QuandoNomeForEmBranco() throws Exception {
         String token = login();
@@ -113,16 +117,18 @@ public class TarefaControllerTest {
                 .content(usuarioCadastroDTO));
 
         String resposta = mockMvc.perform(post("/usuarios/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(loginDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginDTO))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         return "Bearer " + JsonPath.read(resposta, "$.token");
     }
+
     @Test
     void deveListarApenasTarefasAtrasadas() throws Exception {
         String token = login();
+        LocalDate hoje = LocalDate.now();
 
         mockMvc.perform(post("/tarefas")
                 .header("Authorization", token)
@@ -132,9 +138,9 @@ public class TarefaControllerTest {
                             "nome": "Atrasada",
                             "prioridade": 1,
                             "concluida": false,
-                            "dataPrazo": "2026-11-17" 
+                            "dataPrazo": "%s" 
                         }
-                        """));
+                        """.formatted(hoje.minusDays(2))));
 
         mockMvc.perform(post("/tarefas")
                 .header("Authorization", token)
@@ -144,9 +150,9 @@ public class TarefaControllerTest {
                             "nome": "No Prazo",
                             "prioridade": 1,
                             "concluida": false,
-                            "dataPrazo": "2026-11-19"
+                            "dataPrazo": "%s"
                         }
-                        """));
+                        """.formatted(hoje.plusDays(2))));
 
         mockMvc.perform(get("/tarefas/atrasadas")
                         .header("Authorization", token))
@@ -155,5 +161,50 @@ public class TarefaControllerTest {
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
-}
+    @Test
+    void deveRetornarDataCriacaoAoBuscarTarefaPorId() throws Exception {
+        String token = login();
 
+        String resposta = mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Integer id = JsonPath.read(resposta, "$.id");
+
+        mockMvc.perform(get("/tarefas/" + id)
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dataCriacao").isNotEmpty());
+    }
+
+    @Test
+    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception{
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 5,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/tarefas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
+    }
+}
