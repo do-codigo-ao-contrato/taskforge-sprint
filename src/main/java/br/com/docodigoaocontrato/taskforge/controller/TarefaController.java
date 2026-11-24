@@ -27,7 +27,6 @@ public class TarefaController {
         this.iaService = iaService;
     }
 
-
     @GetMapping
     public ResponseEntity<List<TarefaDTO>> listar(
             @RequestParam(required = false) Boolean concluida) {
@@ -38,6 +37,15 @@ public class TarefaController {
     public ResponseEntity<TarefaDTO> buscarTarefaPorId(@PathVariable Long id) {
         Optional<TarefaDTO> tarefaDTO = tarefaService.buscarTarefaPorId(id);
         if (tarefaDTO.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(tarefaDTO.get());
+    }
+
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<TarefaDTO> buscarTarefaPorNome(@PathVariable String nome){
+        Optional<TarefaDTO> tarefaDTO = tarefaService.buscarTarefaPorNome(nome);
+        if(tarefaDTO.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         return ResponseEntity.status(HttpStatus.OK).body(tarefaDTO.get());
