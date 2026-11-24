@@ -104,7 +104,6 @@ public class TarefaServiceTest {
 
         List<TarefaDTO> tarefaBuscada = tarefaService.buscarTodos(null, "estudar");
 
-
         assertEquals(2L, tarefaBuscada.get(0).getId());
         assertEquals("estudar", tarefaBuscada.get(0).getNome());
     }
