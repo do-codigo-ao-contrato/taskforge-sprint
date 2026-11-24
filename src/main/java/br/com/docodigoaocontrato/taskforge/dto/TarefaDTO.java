@@ -1,20 +1,17 @@
 package br.com.docodigoaocontrato.taskforge.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class TarefaDTO {
 
@@ -26,11 +23,23 @@ public class TarefaDTO {
 
     @NotNull(message = "A prioridade é obrigatória")
     @Min(value = 1, message = "A prioridade deve estar entre 1 e 5")
-    @Max(value = 5, message = "A prioridade deve estar entre 1 e 5")
+    @Max(value = 50, message = "A prioridade deve estar entre 1 e 5")
     private Integer prioridade;
 
     @NotNull(message = "Status de conclusão é obrigatório")
     private Boolean concluida;
 
+    private List<ComentarioDTO> comentarios;
+
     private LocalDateTime dataCriacao;
+
+    public TarefaDTO(Long id, String nome, Integer prioridade, Boolean concluida, List<ComentarioDTO> comentarios,
+                     LocalDateTime dataCriacao) {
+        this.id = id;
+        this.nome = nome;
+        this.prioridade = prioridade;
+        this.concluida = concluida;
+        this.comentarios = comentarios;
+        this.dataCriacao = dataCriacao;
+    }
 }

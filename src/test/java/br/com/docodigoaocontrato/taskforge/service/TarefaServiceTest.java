@@ -1,8 +1,11 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,8 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,37 +27,50 @@ public class TarefaServiceTest {
     @Mock
     private TarefaRepository tarefaRepository;
 
+    @Mock
+    private ComentarioRepository comentarioRepository;
+
     @InjectMocks
     private TarefaService tarefaService;
 
     @Test
-    void deveDevolverUmaTarefaQuandoOIdExiste() {
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
+    void deveDevolverUmaTarefaComComentarioQuandoOIdExiste() {
+        // DADO que o banco "tem" a tarefa 1L
+        Comentario comentario = new Comentario(2L, "Estudar", "Junior");
+        List<Comentario> comentarios = new ArrayList<>();
+        comentarios.add(comentario);
+        when(tarefaRepository.existsById(1L)).thenReturn(true);
+        when(comentarioRepository.findByTarefaId(1L)).thenReturn(comentarios);
 
-        Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(1L);
+        // QUANDO eu busco a tarefa
+        Optional<List<ComentarioDTO>> tarefaEncontrada = tarefaService.buscarTarefaComComentarios(1L);
 
-        assertTrue(resultado.isPresent());
-        assertEquals("Estudar", resultado.get().getNome());
-        assertEquals(1, resultado.get().getPrioridade());
+        // ENTAO a tarefa é recuperada E RETORNA UM COMENTÁRIO
+        assertTrue(tarefaEncontrada.isPresent());
+        ComentarioDTO comentarioEncontrado = tarefaEncontrada.get().get(0);
+        assertEquals("Estudar", comentarioEncontrado.getDescricao());
     }
 
     @Test
     void deveDevolverVazioQuandoOIdNaoExiste() {
+        // DADO que o banco nao "tem" a tarefa 99
         when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
 
+        // QUANDO eu busco a tarefa 99
         Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(99L);
 
+        // ENTAO nao vem nenhum resultado
         assertTrue(resultado.isEmpty());
     }
 
     @Test
-    void deveDevelverAprioridadeEditada(){
+    void deveDevelverAprioridadeEditada() {
         // DADO que o banco tem uma tarefa para editar
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
+        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, new ArrayList<>());
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false,
+                new ArrayList<>(), LocalDateTime.now());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
-        when(tarefaRepository.save(any(Tarefa.class)))
+        when(tarefaRepository.save(tarefa))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // QUANDO eu edito a tarefa
@@ -66,7 +83,7 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
-        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
+        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true, new ArrayList<>());
         when(tarefaRepository.findByConcluida(true))
                 .thenReturn(List.of(tarefaConcluida));
 
@@ -79,7 +96,7 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasPendentesQuandoFiltroForFalse() {
-        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false);
+        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false, new ArrayList<>());
         when(tarefaRepository.findByConcluida(false))
                 .thenReturn(List.of(tarefaPendente));
 
