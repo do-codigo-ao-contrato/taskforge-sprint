@@ -1,18 +1,13 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
-import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultMatcher;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -77,6 +72,7 @@ public class TarefaControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(usuario)).andExpect(status().isBadRequest());
     }
+
     @Test
     void deveRetornar400QuandoNomeForEmBranco() throws Exception {
         String token = login();
@@ -85,12 +81,12 @@ public class TarefaControllerTest {
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                        {
-                            "nome": "   ",
-                            "prioridade": 2,
-                            "concluida": false
-                        }
-                        """))
+                                {
+                                    "nome": "   ",
+                                    "prioridade": 2,
+                                    "concluida": false
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
     }
@@ -124,6 +120,25 @@ public class TarefaControllerTest {
     }
 
     @Test
+    void deveRetornar400QuandoPrioridadeForaDoIntervalo() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Estudar",
+                                    "prioridade": 6,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.prioridade").value("A prioridade deve estar entre 1 e 5"));
+
+    }
+
+    @Test
     void deveRetornarDataCriacaoAoBuscarTarefaPorId() throws Exception {
         String token = login();
 
@@ -151,7 +166,7 @@ public class TarefaControllerTest {
     }
 
     @Test
-    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception{
+    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception {
         String token = login();
 
         mockMvc.perform(post("/tarefas")
