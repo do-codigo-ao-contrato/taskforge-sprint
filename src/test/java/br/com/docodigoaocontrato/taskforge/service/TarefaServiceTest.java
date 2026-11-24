@@ -69,7 +69,7 @@ public class TarefaServiceTest {
         when(tarefaRepository.findByConcluida(true))
                 .thenReturn(List.of(tarefaConcluida));
 
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(true);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(true, null);
 
         assertEquals(1, resultado.size());
         assertTrue(resultado.get(0).getConcluida());
@@ -82,7 +82,7 @@ public class TarefaServiceTest {
         when(tarefaRepository.findByConcluida(false))
                 .thenReturn(List.of(tarefaPendente));
 
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(false);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(false, null);
 
         assertEquals(1, resultado.size());
         assertFalse(resultado.get(0).getConcluida());
@@ -95,5 +95,16 @@ public class TarefaServiceTest {
 
         assertTrue(apagada);
         verify(tarefaRepository).deleteById(99L);
+    }
+    @Test
+    void deveBuscarTarefasPorNome() {
+        Tarefa tarefaRepositorio = new Tarefa(2L, "estudar", 2, false);
+        when(tarefaRepository.findByNomeContainingIgnoreCase("estudar"))
+                .thenReturn(List.of(tarefaRepositorio));
+
+        List<TarefaDTO> tarefaBuscada = tarefaService.buscarTodos(null, "estudar");
+
+        assertEquals(2L, tarefaBuscada.get(0).getId());
+        assertEquals("estudar", tarefaBuscada.get(0).getNome());
     }
 }
