@@ -106,10 +106,11 @@ public class TarefaServiceTest {
         verify(tarefaRepository, times(1)).countByConcluida(true);
         verify(tarefaRepository, times(1)).countByConcluida(false);
     }
-}
 
     @Test
     void deveApagarTarefaConformeImplementacaoAtualDoService() {
+        when(tarefaRepository.existsById(99L)).thenReturn(true);
+
         boolean apagada = tarefaService.deletarTarefa(99L);
 
         assertTrue(apagada);
