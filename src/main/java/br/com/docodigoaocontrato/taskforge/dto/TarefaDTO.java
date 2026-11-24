@@ -1,22 +1,17 @@
 package br.com.docodigoaocontrato.taskforge.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 public class TarefaDTO {
 
@@ -38,6 +33,13 @@ public class TarefaDTO {
 
     private LocalDateTime dataCriacao;
 
-    public TarefaDTO(Long id, String nome, Integer prioridade, Boolean concluida, LocalDateTime dataCriacao) {
+    public TarefaDTO(Long id, String nome, Integer prioridade, Boolean concluida, List<ComentarioDTO> comentarios,
+                     LocalDateTime dataCriacao) {
+        this.id = id;
+        this.nome = nome;
+        this.prioridade = prioridade;
+        this.concluida = concluida;
+        this.comentarios = comentarios;
+        this.dataCriacao = dataCriacao;
     }
 }

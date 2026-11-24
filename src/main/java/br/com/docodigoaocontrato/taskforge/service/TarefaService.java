@@ -4,6 +4,7 @@ import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +15,23 @@ import java.util.Optional;
 public class TarefaService {
 
     private final TarefaRepository tarefaRepository;
+    private final ComentarioRepository comentarioRepository;
 
-    public TarefaService(TarefaRepository tarefaRepository) {
+    public TarefaService(TarefaRepository tarefaRepository, ComentarioRepository comentarioRepository) {
         this.tarefaRepository = tarefaRepository;
+        this.comentarioRepository = comentarioRepository;
     }
 
-    public Optional<TarefaDTO> buscarTarefaComComentarios(Long id) {
-        Optional<TarefaDTO> tarefaComComentario = tarefaRepository.findById(id).map(tarefa -> toDto(tarefa));
-        if (tarefaComComentario.isEmpty()) {
+    public Optional<List<ComentarioDTO>> buscarTarefaComComentarios(Long id) {
+        if (!tarefaRepository.existsById(id)) {
             return Optional.empty();
         }
-        return Optional.of(tarefaComComentario.get());
+        List<ComentarioDTO> comentarioDTO = comentarioRepository.findByTarefaId(id)
+                .stream()
+                .map(this::comentarioToDto)
+                .toList();
+
+        return Optional.of(comentarioDTO);
     }
 
     public List<TarefaDTO> buscarTodos(Boolean concluida) {
@@ -56,6 +63,7 @@ public class TarefaService {
             Tarefa tarefa = tarefaRecuperada.get();
             tarefa.setNome(tarefaDTO.getNome());
             tarefa.setConcluida(tarefaDTO.getConcluida());
+            tarefa.setPrioridade(tarefaDTO.getPrioridade());
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
         return Optional.empty();

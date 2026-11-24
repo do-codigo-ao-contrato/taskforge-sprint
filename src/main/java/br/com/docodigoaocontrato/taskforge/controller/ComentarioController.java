@@ -14,7 +14,7 @@ import java.util.Optional;
 public class ComentarioController {
 
     private final ComentarioService comentarioService;
-    List<ComentarioDTO> comentarios;
+
     public ComentarioController(ComentarioService comentarioService) {
         this.comentarioService = comentarioService;
     }
@@ -34,14 +34,16 @@ public class ComentarioController {
     }
 
     @PostMapping("/{id}/comentarios")
-    public ResponseEntity<Optional<ComentarioDTO>> criar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(comentarioService.criarComentario(id ,comentarioDTO));
+    public ResponseEntity<ComentarioDTO> criar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO) {
+        Optional<ComentarioDTO> comentarioCriado = comentarioService.criarComentario(id, comentarioDTO);
+        if (comentarioCriado.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(comentarioCriado.get());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComentarioDTO> atualizar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO){
+    public ResponseEntity<ComentarioDTO> atualizar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO) {
         Optional<ComentarioDTO> comentarioAtualizado = comentarioService.atualizarComentario(id, comentarioDTO);
         if (comentarioAtualizado.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

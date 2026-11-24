@@ -20,10 +20,8 @@ import java.util.Optional;
 @Tag(name = "Tarefas", description = "Gerenciador de tarefas")
 public class TarefaController {
 
-
     private final TarefaService tarefaService;
     private final IaService iaService;
-    List<ComentarioDTO> comentarios;
 
     public TarefaController(TarefaService tarefaService, IaService iaService) {
         this.tarefaService = tarefaService;
@@ -37,12 +35,12 @@ public class TarefaController {
     }
 
     @GetMapping("/{id}/comentarios")
-    public ResponseEntity<TarefaDTO> buscarTarefaComComentarios(@PathVariable Long id) {
-        Optional<TarefaDTO> tarefaComComentario = tarefaService.buscarTarefaComComentarios(id);
-        if (tarefaComComentario.isEmpty()) {
+    public ResponseEntity<List<ComentarioDTO>> buscarTarefaComComentarios(@PathVariable Long id) {
+        Optional<List<ComentarioDTO>> listaComentario = tarefaService.buscarTarefaComComentarios(id);
+        if (listaComentario.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return ResponseEntity.status(HttpStatus.OK).body(tarefaComComentario.get());
+        return ResponseEntity.status(HttpStatus.OK).body(listaComentario.get());
     }
 
     @GetMapping("/{id}")

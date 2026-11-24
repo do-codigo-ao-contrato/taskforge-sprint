@@ -4,6 +4,7 @@ import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,10 +12,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.List;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +26,9 @@ public class TarefaServiceTest {
     @Mock
     private TarefaRepository tarefaRepository;
 
+    @Mock
+    private ComentarioRepository comentarioRepository;
+
     @InjectMocks
     private TarefaService tarefaService;
 
@@ -35,15 +38,15 @@ public class TarefaServiceTest {
         Comentario comentario = new Comentario(2L, "Estudar", "Junior");
         List<Comentario> comentarios = new ArrayList<>();
         comentarios.add(comentario);
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, comentarios);
-        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
+        when(tarefaRepository.existsById(1L)).thenReturn(true);
+        when(comentarioRepository.findByTarefaId(1L)).thenReturn(comentarios);
 
         // QUANDO eu busco a tarefa
-        Optional<TarefaDTO> tarefaEncontrada = tarefaService.buscarTarefaComComentarios(1L);
+        Optional<List<ComentarioDTO>> tarefaEncontrada = tarefaService.buscarTarefaComComentarios(1L);
 
         // ENTAO a tarefa é recuperada E RETORNA UM COMENTÁRIO
         assertTrue(tarefaEncontrada.isPresent());
-        ComentarioDTO comentarioEncontrado = tarefaEncontrada.get().getComentarios().get(0);
+        ComentarioDTO comentarioEncontrado = tarefaEncontrada.get().get(0);
         assertEquals("Estudar", comentarioEncontrado.getDescricao());
     }
 
@@ -60,12 +63,13 @@ public class TarefaServiceTest {
     }
 
     @Test
-    void deveDevelverAprioridadeEditada(){
+    void deveDevelverAprioridadeEditada() {
         // DADO que o banco tem uma tarefa para editar
         Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, new ArrayList<>());
-        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false,
+                new ArrayList<>(), LocalDateTime.now());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
-        when(tarefaRepository.save(any(Tarefa.class)))
+        when(tarefaRepository.save(tarefa))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // QUANDO eu edito a tarefa
