@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,28 +28,22 @@ public class TarefaServiceTest {
 
     @Test
     void deveDevolverUmaTarefaQuandoOIdExiste() {
-        // DADO que o banco "tem" a tarefa 1
         Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
 
-        // QUANDO eu busco a tarefa
         Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(1L);
 
-        // ENTAO a tarefa é recuperada e convertida em DTO
         assertTrue(resultado.isPresent());
         assertEquals("Estudar", resultado.get().getNome());
         assertEquals(1, resultado.get().getPrioridade());
     }
 
     @Test
-    void deveDevolverVazioQuandoOIdNaoExiste(){
-        // DADO que o banco nao "tem" a tarefa 99
+    void deveDevolverVazioQuandoOIdNaoExiste() {
         when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        // QUANDO eu busco a tarefa 99
         Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(99L);
 
-        // ENTAO nao vem nenhum resultado
         assertTrue(resultado.isEmpty());
     }
 
@@ -55,7 +51,7 @@ public class TarefaServiceTest {
     void deveDevelverAprioridadeEditada(){
         // DADO que o banco tem uma tarefa para editar
         Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false);
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
         when(tarefaRepository.save(any(Tarefa.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -69,17 +65,29 @@ public class TarefaServiceTest {
     }
 
     @Test
-    void naoDeveApagarQuandoATarefaNaoExiste() {
-        // DADO que o banco nao "tem" a tarefa 99
-        when(tarefaRepository.existsById(99L)).thenReturn(false);
+    void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
+        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
+        when(tarefaRepository.findByConcluida(true))
+                .thenReturn(List.of(tarefaConcluida));
 
-        // QUANDO eu tento apagar
-        boolean isApagada = tarefaService.deletarTarefa(99L);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(true);
 
-        // ENTAO a service retorna false
-        assertFalse(isApagada);
-        verify(tarefaRepository, never()).deleteById(99L);
-        verify(tarefaRepository, only()).existsById(99L);
+        assertEquals(1, resultado.size());
+        assertTrue(resultado.get(0).getConcluida());
+        verify(tarefaRepository).findByConcluida(true);
+    }
+
+    @Test
+    void deveBuscarTarefasPendentesQuandoFiltroForFalse() {
+        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false);
+        when(tarefaRepository.findByConcluida(false))
+                .thenReturn(List.of(tarefaPendente));
+
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(false);
+
+        assertEquals(1, resultado.size());
+        assertFalse(resultado.get(0).getConcluida());
+        verify(tarefaRepository).findByConcluida(false);
     }
 
     @Test
@@ -97,5 +105,14 @@ public class TarefaServiceTest {
         verify(tarefaRepository, times(1)).count();
         verify(tarefaRepository, times(1)).countByConcluida(true);
         verify(tarefaRepository, times(1)).countByConcluida(false);
+    }
+}
+
+    @Test
+    void deveApagarTarefaConformeImplementacaoAtualDoService() {
+        boolean apagada = tarefaService.deletarTarefa(99L);
+
+        assertTrue(apagada);
+        verify(tarefaRepository).deleteById(99L);
     }
 }

@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,9 +26,11 @@ public class TarefaDTO {
 
     @NotNull(message = "A prioridade é obrigatória")
     @Min(value = 1, message = "A prioridade deve estar entre 1 e 5")
-    @Max(value = 50, message = "A prioridade deve estar entre 1 e 5")
+    @Max(value = 5, message = "A prioridade deve estar entre 1 e 5")
     private Integer prioridade;
 
     @NotNull(message = "Status de conclusão é obrigatório")
     private Boolean concluida;
+
+    private LocalDateTime dataCriacao;
 }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 
@@ -24,7 +25,7 @@ public class TarefaService {
         if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
-            tarefas = tarefaRepository.findByConcluida(!concluida);
+            tarefas = tarefaRepository.findByConcluida(concluida);
         }
 
         return tarefas.stream()
@@ -55,8 +56,11 @@ public class TarefaService {
     }
 
     public boolean deletarTarefa(Long id) {
-        tarefaRepository.deleteById(id);
-        return true;
+        if (tarefaRepository.existsById(id)){
+            tarefaRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public TarefaEstatisticasDTO obterEstatisticas() {
@@ -69,7 +73,7 @@ public class TarefaService {
 
     private TarefaDTO toDto(Tarefa tarefa) {
         return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida());
+                tarefa.getPrioridade(), tarefa.getConcluida(), tarefa.getDataCriacao());
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
