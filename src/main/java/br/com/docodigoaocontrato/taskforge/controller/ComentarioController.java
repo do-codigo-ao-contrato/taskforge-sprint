@@ -20,8 +20,9 @@ public class ComentarioController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ComentarioDTO>> listarTodos() {
-        return ResponseEntity.ok(comentarioService.listarTodos());
+    public ResponseEntity<List<ComentarioDTO>> listarTodos(
+            @RequestParam(required = false) String autor) {
+        return ResponseEntity.ok(comentarioService.listarTodos(autor));
     }
 
     @GetMapping("/{id}")
@@ -41,7 +42,7 @@ public class ComentarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ComentarioDTO> atualizar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO){
+    public ResponseEntity<ComentarioDTO> atualizar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO) {
         Optional<ComentarioDTO> comentarioAtualizado = comentarioService.atualizarComentario(id, comentarioDTO);
         if (comentarioAtualizado.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
