@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 
-        List<Comentario> findByAutorContainsIgnoreCase(String autor);
-    }
+    List<Comentario> findByTarefaId(Long id);
+}

@@ -1,0 +1,15 @@
+[33m49fa0e6[m feat: merge com a main e ajustes.
+[33m6235a23[m fix: Remove senha do DTO de resposta e adiciona teste de integração.
+[33m3d87063[m fix/Prioridade Nao muda- com teste unitário
+[33m5403bc2[m BUG - PRIORIDADE NÃO MUDA
+[33m899c85a[m fix: impede criacao de tarefa com nome em branco (#36)
+[33m3a6994a[m Bug/Senha Menos de 6 caract.- com teste unitário
+[33mc7ede8f[m Bug/Senha Menos de 6 caract.
+[33mf5d8e0e[m test: adiciona testes de dataCriacao na busca por id e na lista
+[33me370c4a[m test: adiciona teste de dataCriacao na busca por id
+[33m5e45c30[m feat: adiciona dataCriacao na resposta de tarefas
+[33m7d2f8fd[m feat: adiciona dataCriacao na resposta de tarefas
+[33m6c91c24[m Adiciona testes unitários para o filtro.
+[33m02da2cb[m Corrige filtro de tarefas concluídas.
+[33m5b640f8[m Bug/Senha Menos de 6 caract.- com teste unitário
+[33m9737bcf[m feat - buscar tarefa por nome

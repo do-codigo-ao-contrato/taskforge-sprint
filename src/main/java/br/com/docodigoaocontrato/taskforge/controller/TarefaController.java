@@ -1,5 +1,6 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.service.IaService;
@@ -7,11 +8,12 @@ import br.com.docodigoaocontrato.taskforge.service.TarefaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,10 +31,20 @@ public class TarefaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TarefaDTO>> listar(
+    public ResponseEntity<Page<TarefaDTO>> listar(
             @RequestParam(required = false) Boolean concluida,
-            @RequestParam(required = false) String busca) {
-        return ResponseEntity.ok(tarefaService.buscarTodos(concluida, busca));
+            @RequestParam(required = false) String busca,
+            Pageable pageable) {
+        return ResponseEntity.ok(tarefaService.buscarTodos(concluida, busca, pageable));
+    }
+
+    @GetMapping("/{id}/comentarios")
+    public ResponseEntity<List<ComentarioDTO>> buscarTarefaComComentarios(@PathVariable Long id) {
+        Optional<List<ComentarioDTO>> listaComentario = tarefaService.buscarTarefaComComentarios(id);
+        if (listaComentario.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(listaComentario.get());
     }
 
     @GetMapping("/{id}")

@@ -22,6 +22,10 @@ public class Comentario {
     private String autor;
     private LocalDateTime dataCriacao;
 
+    @ManyToOne
+    @JoinColumn(name = "tarefa_id")
+    private Tarefa tarefa;
+
     @PrePersist
     public void aoCriar() {
         this.dataCriacao = LocalDateTime.now();

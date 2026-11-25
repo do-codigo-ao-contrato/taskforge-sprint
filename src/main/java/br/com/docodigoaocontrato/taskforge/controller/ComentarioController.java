@@ -34,11 +34,13 @@ public class ComentarioController {
         return ResponseEntity.status(HttpStatus.OK).body(comentarioDTO.get());
     }
 
-    @PostMapping
-    public ResponseEntity<ComentarioDTO> criar(@RequestBody ComentarioDTO comentarioDTO) {
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(comentarioService.criarComentario(comentarioDTO));
+    @PostMapping("/{id}/comentarios")
+    public ResponseEntity<ComentarioDTO> criar(@PathVariable Long id, @RequestBody ComentarioDTO comentarioDTO) {
+        Optional<ComentarioDTO> comentarioCriado = comentarioService.criarComentario(id, comentarioDTO);
+        if (comentarioCriado.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(comentarioCriado.get());
     }
 
     @PutMapping("/{id}")
