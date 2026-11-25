@@ -27,8 +27,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErroResposta> tratarJsonInvalido(HttpMessageNotReadableException ex) {
-        ErroResposta resposta = new ErroResposta(400, "JSON inválido: confira a estrutura, vírgulas, " +
-                "chaves, colchetes, aspas", Map.of());
+        ErroResposta resposta = new ErroResposta(400, "Corpo da requisição inválido: confira o formato " +
+                "do JSON e os tipos dos campos", Map.of());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(resposta);
     }
 }
