@@ -20,9 +20,11 @@ public class TarefaService {
         this.tarefaRepository = tarefaRepository;
     }
 
-    public List<TarefaDTO> buscarTodos(Boolean concluida) {
+    public List<TarefaDTO> buscarTodos(Boolean concluida, String busca) {
         List<Tarefa> tarefas;
-        if (concluida == null) {
+        if (busca != null && !busca.isBlank()) {
+            tarefas = tarefaRepository.findByNomeContainingIgnoreCase(busca);
+        } else if (concluida == null) {
             tarefas = tarefaRepository.findAll();
         } else {
             tarefas = tarefaRepository.findByConcluida(concluida);

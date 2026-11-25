@@ -28,11 +28,11 @@ public class TarefaController {
         this.iaService = iaService;
     }
 
-
     @GetMapping
     public ResponseEntity<List<TarefaDTO>> listar(
-            @RequestParam(required = false) Boolean concluida) {
-        return ResponseEntity.ok(tarefaService.buscarTodos(concluida));
+            @RequestParam(required = false) Boolean concluida,
+            @RequestParam(required = false) String busca) {
+        return ResponseEntity.ok(tarefaService.buscarTodos(concluida, busca));
     }
 
     @GetMapping("/{id}")
