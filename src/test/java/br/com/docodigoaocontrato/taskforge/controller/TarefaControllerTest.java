@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class TarefaControllerTest {
 
     @Autowired
-    private MockMvc mockMvc;  // SIMULA um POSTMAN
+    private MockMvc mockMvc;
 
     @Test
     void deveRetornarStatus401QuandoNaoTemToken() throws Exception {
@@ -35,12 +35,12 @@ public class TarefaControllerTest {
                         .header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {
-                                    "nome": "",
-                                    "prioridade": 5,
-                                    "concluida": false
-                                }
-                                """))
+                        {
+                            "nome": "",
+                            "prioridade": 5,
+                            "concluida": false
+                        }
+                        """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
     }
@@ -89,6 +89,36 @@ public class TarefaControllerTest {
                                 """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
+    }
+
+    @Test
+    void deveOrdenarPorPrioridadeQuandoParametroEnviado() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Tarefa A", "prioridade": 1, "concluida": false}
+                        """));
+
+        mockMvc.perform(post("/tarefas")
+                .header("Authorization", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome": "Tarefa B", "prioridade": 5, "concluida": false}
+                        """));
+
+        mockMvc.perform(get("/tarefas?ordenar=prioridade")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Tarefa B"))
+                .andExpect(jsonPath("$[1].nome").value("Tarefa A"));
+
+        mockMvc.perform(get("/tarefas")
+                        .header("Authorization", token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nome").value("Tarefa A"));
     }
 
     private String login() throws Exception {

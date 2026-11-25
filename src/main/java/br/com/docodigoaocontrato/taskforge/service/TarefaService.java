@@ -1,12 +1,13 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
-import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
@@ -20,24 +21,39 @@ public class TarefaService {
         this.tarefaRepository = tarefaRepository;
     }
 
-    public List<TarefaDTO> buscarTodos(Boolean concluida, String busca) {
+    public List<TarefaDTO> buscarTodos(Boolean concluida, String ordenar) {
+        Sort sort = "prioridade".equalsIgnoreCase(ordenar)
+                ? Sort.by(Sort.Direction.DESC, "prioridade")
+                : Sort.unsorted();
+
         List<Tarefa> tarefas;
-        if (busca != null && !busca.isBlank()) {
-            tarefas = tarefaRepository.findByNomeContainingIgnoreCase(busca);
-        } else if (concluida == null) {
-            tarefas = tarefaRepository.findAll();
+        if (concluida == null) {
+            tarefas = tarefaRepository.findAll(sort);
         } else {
-            tarefas = tarefaRepository.findByConcluida(concluida);
+            // A CORREÇÃO DO PR: Removido o '!' daqui
+            tarefas = tarefaRepository.findByConcluida(concluida, sort);
         }
 
+        // WARNING CORRIGIDO: Usando method reference (this::toDto)
         return tarefas.stream()
-                .map(tarefa -> toDto(tarefa))
+                .map(this::toDto)
+                .toList();
+    }
+
+    public List<TarefaDTO> buscarAtrasadas() {
+        LocalDate hoje = LocalDate.now();
+        List<Tarefa> tarefasAtrasadas = tarefaRepository.findByDataPrazoBeforeAndConcluidaFalse(hoje);
+
+        // WARNING CORRIGIDO: Usando method reference
+        return tarefasAtrasadas.stream()
+                .map(this::toDto)
                 .toList();
     }
 
     public Optional<TarefaDTO> buscarTarefaPorId(Long id) {
+        // WARNING CORRIGIDO: Usando method reference
         return tarefaRepository.findById(id)
-                .map(tarefa -> toDto(tarefa));
+                .map(this::toDto);
     }
 
     public TarefaDTO criarTarefa(TarefaDTO tarefaDTO) {
@@ -52,13 +68,15 @@ public class TarefaService {
             tarefa.setNome(tarefaDTO.getNome());
             tarefa.setConcluida(tarefaDTO.getConcluida());
             tarefa.setPrioridade(tarefaDTO.getPrioridade());
+            // ERRO CORRIGIDO: Removido tarefa.setDataPrazo(tarefaDTO.getDataPrazo()) pois o DTO não tem mais esse campo.
+
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
         return Optional.empty();
     }
 
     public boolean deletarTarefa(Long id) {
-        if (tarefaRepository.existsById(id)){
+        if (tarefaRepository.existsById(id)) {
             tarefaRepository.deleteById(id);
             return true;
         }
@@ -74,12 +92,24 @@ public class TarefaService {
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {
-        return new TarefaDTO(tarefa.getId(), tarefa.getNome(),
-                tarefa.getPrioridade(), tarefa.getConcluida(), tarefa.getDataCriacao());
+        // ERRO CORRIGIDO: Ajustado para os 5 parâmetros exatos do @AllArgsConstructor do TarefaDTO
+        // E removido o getDataPrazo() que não existe mais no DTO.
+        return new TarefaDTO(
+                tarefa.getId(),
+                tarefa.getNome(),
+                tarefa.getPrioridade(),
+                tarefa.getConcluida(),
+                tarefa.getDataCriacao()
+        );
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
-        return new Tarefa(tarefaDTO.getNome(),
-                tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
+        Tarefa tarefa = new Tarefa(
+                tarefaDTO.getNome(),
+                tarefaDTO.getPrioridade(),
+                tarefaDTO.getConcluida()
+        );
+        // ERRO CORRIGIDO: Removido setDataPrazo pois o DTO não tem mais o campo.
+        return tarefa;
     }
 }
