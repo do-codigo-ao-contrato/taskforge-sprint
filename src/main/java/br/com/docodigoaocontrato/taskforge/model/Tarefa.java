@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;      
 import java.time.LocalDateTime;
 
 @Entity
@@ -22,6 +23,9 @@ public class Tarefa {
     private String nome;
     private Integer prioridade;
     private Boolean concluida;
+
+    private LocalDate dataPrazo; 
+
     private LocalDateTime dataCriacao;
 
     @PrePersist
