@@ -30,11 +30,13 @@ public class TarefaService {
         if (concluida == null) {
             tarefas = tarefaRepository.findAll(sort);
         } else {
-            tarefas = tarefaRepository.findByConcluida(!concluida, sort);
+            // A CORREÇÃO DO PR: Removido o '!' daqui
+            tarefas = tarefaRepository.findByConcluida(concluida, sort);
         }
 
+        // WARNING CORRIGIDO: Usando method reference (this::toDto)
         return tarefas.stream()
-                .map(tarefa -> toDto(tarefa))
+                .map(this::toDto)
                 .toList();
     }
 
@@ -42,14 +44,16 @@ public class TarefaService {
         LocalDate hoje = LocalDate.now();
         List<Tarefa> tarefasAtrasadas = tarefaRepository.findByDataPrazoBeforeAndConcluidaFalse(hoje);
 
+        // WARNING CORRIGIDO: Usando method reference
         return tarefasAtrasadas.stream()
-                .map(tarefa -> toDto(tarefa))
+                .map(this::toDto)
                 .toList();
     }
 
     public Optional<TarefaDTO> buscarTarefaPorId(Long id) {
+        // WARNING CORRIGIDO: Usando method reference
         return tarefaRepository.findById(id)
-                .map(tarefa -> toDto(tarefa));
+                .map(this::toDto);
     }
 
     public TarefaDTO criarTarefa(TarefaDTO tarefaDTO) {
@@ -64,7 +68,7 @@ public class TarefaService {
             tarefa.setNome(tarefaDTO.getNome());
             tarefa.setConcluida(tarefaDTO.getConcluida());
             tarefa.setPrioridade(tarefaDTO.getPrioridade());
-            tarefa.setDataPrazo(tarefaDTO.getDataPrazo());
+            // ERRO CORRIGIDO: Removido tarefa.setDataPrazo(tarefaDTO.getDataPrazo()) pois o DTO não tem mais esse campo.
 
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
@@ -72,7 +76,7 @@ public class TarefaService {
     }
 
     public boolean deletarTarefa(Long id) {
-        if (tarefaRepository.existsById(id)){
+        if (tarefaRepository.existsById(id)) {
             tarefaRepository.deleteById(id);
             return true;
         }
@@ -88,20 +92,24 @@ public class TarefaService {
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {
+        // ERRO CORRIGIDO: Ajustado para os 5 parâmetros exatos do @AllArgsConstructor do TarefaDTO
+        // E removido o getDataPrazo() que não existe mais no DTO.
         return new TarefaDTO(
                 tarefa.getId(),
                 tarefa.getNome(),
                 tarefa.getPrioridade(),
                 tarefa.getConcluida(),
-                tarefa.getDataPrazo(),
                 tarefa.getDataCriacao()
         );
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
-        Tarefa tarefa = new Tarefa(tarefaDTO.getNome(),
-                tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
-        tarefa.setDataPrazo(tarefaDTO.getDataPrazo());
+        Tarefa tarefa = new Tarefa(
+                tarefaDTO.getNome(),
+                tarefaDTO.getPrioridade(),
+                tarefaDTO.getConcluida()
+        );
+        // ERRO CORRIGIDO: Removido setDataPrazo pois o DTO não tem mais o campo.
         return tarefa;
     }
 }
