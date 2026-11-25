@@ -1,15 +1,15 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
 
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
-import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class TarefaService {
@@ -20,19 +20,16 @@ public class TarefaService {
         this.tarefaRepository = tarefaRepository;
     }
 
-    public List<TarefaDTO> buscarTodos(Boolean concluida, String busca) {
-        List<Tarefa> tarefas;
+    public Page<TarefaDTO> buscarTodos(Boolean concluida, String busca, Pageable pageable) {
+        Page<Tarefa> tarefas;
         if (busca != null && !busca.isBlank()) {
-            tarefas = tarefaRepository.findByNomeContainingIgnoreCase(busca);
+            tarefas = tarefaRepository.findByNomeContainingIgnoreCase(busca, pageable);
         } else if (concluida == null) {
-            tarefas = tarefaRepository.findAll();
+            tarefas = tarefaRepository.findAll(pageable);
         } else {
-            tarefas = tarefaRepository.findByConcluida(concluida);
+            tarefas = tarefaRepository.findByConcluida(concluida, pageable);
         }
-
-        return tarefas.stream()
-                .map(tarefa -> toDto(tarefa))
-                .toList();
+        return tarefas.map(tarefa -> toDto(tarefa));
     }
 
     public Optional<TarefaDTO> buscarTarefaPorId(Long id) {
@@ -58,7 +55,7 @@ public class TarefaService {
     }
 
     public boolean deletarTarefa(Long id) {
-        if (tarefaRepository.existsById(id)){
+        if (tarefaRepository.existsById(id)) {
             tarefaRepository.deleteById(id);
             return true;
         }
