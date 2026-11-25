@@ -1,12 +1,13 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,15 +21,15 @@ public class TarefaService {
     }
 
     public List<TarefaDTO> buscarTodos(Boolean concluida, String ordenar) {
+        Sort sort = "prioridade".equalsIgnoreCase(ordenar)
+                ? Sort.by(Sort.Direction.DESC, "prioridade")
+                : Sort.unsorted();
+
         List<Tarefa> tarefas;
         if (concluida == null) {
-            tarefas = tarefaRepository.findAll();
+            tarefas = tarefaRepository.findAll(sort);
         } else {
-            tarefas = tarefaRepository.findByConcluida(concluida);
-        }
-
-        if ("prioridade".equalsIgnoreCase(ordenar)) {
-            tarefas.sort(Comparator.comparing(Tarefa::getPrioridade).reversed());
+            tarefas = tarefaRepository.findByConcluida(concluida, sort);
         }
 
         return tarefas.stream()
@@ -75,6 +76,14 @@ public class TarefaService {
             return true;
         }
         return false;
+    }
+
+    public TarefaEstatisticasDTO obterEstatisticas() {
+        long total = tarefaRepository.count();
+        long concluidas = tarefaRepository.countByConcluida(true);
+        long pendentes = tarefaRepository.countByConcluida(false);
+
+        return new TarefaEstatisticasDTO(total, concluidas, pendentes);
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {

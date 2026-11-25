@@ -8,13 +8,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
 
-import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,17 +51,15 @@ public class TarefaServiceTest {
 
     @Test
     void deveDevelverAprioridadeEditada(){
-        // DADO que o banco tem uma tarefa para editar
         Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
         TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDate.now(), LocalDateTime.now());
+
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
         when(tarefaRepository.save(any(Tarefa.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // QUANDO eu edito a tarefa
         Optional<TarefaDTO> tarefaAtualizada = tarefaService.atualizarTarefa(1L, tarefaNova);
 
-        // ENTAO tarefa muda o valor da prioridade
         assertTrue(tarefaAtualizada.isPresent());
         assertEquals(5, tarefaAtualizada.get().getPrioridade());
     }
@@ -67,27 +67,29 @@ public class TarefaServiceTest {
     @Test
     void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
         Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
-        when(tarefaRepository.findByConcluida(true))
+
+        when(tarefaRepository.findByConcluida(true, Sort.unsorted()))
                 .thenReturn(List.of(tarefaConcluida));
 
         List<TarefaDTO> resultado = tarefaService.buscarTodos(true, null);
 
         assertEquals(1, resultado.size());
         assertTrue(resultado.get(0).getConcluida());
-        verify(tarefaRepository).findByConcluida(true);
+        verify(tarefaRepository).findByConcluida(true, Sort.unsorted());
     }
 
     @Test
     void deveBuscarTarefasPendentesQuandoFiltroForFalse() {
         Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false);
-        when(tarefaRepository.findByConcluida(false))
+
+        when(tarefaRepository.findByConcluida(false, Sort.unsorted()))
                 .thenReturn(List.of(tarefaPendente));
 
         List<TarefaDTO> resultado = tarefaService.buscarTodos(false, null);
 
         assertEquals(1, resultado.size());
         assertFalse(resultado.get(0).getConcluida());
-        verify(tarefaRepository).findByConcluida(false);
+        verify(tarefaRepository).findByConcluida(false, Sort.unsorted());
     }
 
     @Test
