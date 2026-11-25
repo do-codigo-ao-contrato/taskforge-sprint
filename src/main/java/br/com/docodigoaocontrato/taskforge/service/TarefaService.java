@@ -1,6 +1,5 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;

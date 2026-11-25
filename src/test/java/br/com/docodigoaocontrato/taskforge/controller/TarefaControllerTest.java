@@ -227,6 +227,6 @@ public class TarefaControllerTest {
         mockMvc.perform(get("/tarefas")
                         .header("Authorization", token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
+                .andExpect(jsonPath("$.content[0].dataCriacao").isNotEmpty());
     }
 }

@@ -124,10 +124,11 @@ public class TarefaServiceTest {
     @Test
     void deveBuscarTarefasPorNome() {
         Tarefa tarefaRepositorio = new Tarefa(2L, "estudar", 2, false);
-        when(tarefaRepository.findByNomeContainingIgnoreCase("estudar", null))
+        Pageable paginas = Pageable.unpaged();
+        when(tarefaRepository.findByNomeContainingIgnoreCase("estudar", paginas))
                 .thenReturn(new PageImpl<>(List.of(tarefaRepositorio)));
 
-        Page<TarefaDTO> tarefaBuscada = tarefaService.buscarTodos(null, "estudar", Pageable.unpaged());
+        Page<TarefaDTO> tarefaBuscada = tarefaService.buscarTodos(null, "estudar", paginas);
 
         assertEquals(2L, tarefaBuscada.getContent().get(0).getId());
         assertEquals("estudar", tarefaBuscada.getContent().get(0).getNome());
