@@ -1,11 +1,8 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
-import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
-import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +14,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,7 +33,7 @@ public class TarefaServiceTest {
 
     @Test
     void deveDevolverUmaTarefaQuandoOIdExiste() {
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
+        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, new ArrayList<>());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
 
         Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(1L);
@@ -75,8 +72,8 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
-        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
-        when(tarefaRepository.findByConcluida(true))
+        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true, new ArrayList<>());
+        when(tarefaRepository.findByConcluida(true, null))
                 .thenReturn((Page<Tarefa>) List.of(tarefaConcluida));
 
         Page<TarefaDTO> resultado = tarefaService.buscarTodos(true, null, null);
@@ -88,15 +85,15 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasPendentesQuandoFiltroForFalse() {
-        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false);
+        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false, new ArrayList<>());
         when(tarefaRepository.findByConcluida(false, null))
                 .thenReturn(new PageImpl<>(List.of(tarefaPendente)));
 
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(false);
+        Page<TarefaDTO> resultado = tarefaService.buscarTodos(false, null, null);
 
-        assertEquals(1, resultado.size());
-        assertFalse(resultado.get(0).getConcluida());
-        verify(tarefaRepository).findByConcluida(false);
+        assertEquals(1, resultado.getContent().size());
+        assertFalse(resultado.getContent().get(0).getConcluida());
+        verify(tarefaRepository).findByConcluida(false, null);
     }
 
     @Test
@@ -128,7 +125,7 @@ public class TarefaServiceTest {
 
     @Test
     void deveBuscarTarefasPorNome() {
-        Tarefa tarefaRepositorio = new Tarefa(2L, "estudar", 2, false);
+        Tarefa tarefaRepositorio = new Tarefa(2L, "estudar", 2, false, new ArrayList<>());
         Pageable paginas = Pageable.unpaged();
         when(tarefaRepository.findByNomeContainingIgnoreCase("estudar", paginas))
                 .thenReturn(new PageImpl<>(List.of(tarefaRepositorio)));
@@ -141,8 +138,8 @@ public class TarefaServiceTest {
 
     @Test
     void deveDevolverAListaDeTarefasPorPagina() {
-        Tarefa tarefaRepositorio1 = new Tarefa(2L, "estudar", 2, false);
-        Tarefa tarefaRepositorio2 = new Tarefa(3L, "Descansar", 3, true);
+        Tarefa tarefaRepositorio1 = new Tarefa(2L, "estudar", 2, false, new ArrayList<>());
+        Tarefa tarefaRepositorio2 = new Tarefa(3L, "Descansar", 3, true, new ArrayList<>());
         Pageable paginas = PageRequest.of(0, 10);
 
         when(tarefaRepository.findAll(paginas)).thenReturn(new PageImpl<>(List.of(tarefaRepositorio1, tarefaRepositorio2)));
