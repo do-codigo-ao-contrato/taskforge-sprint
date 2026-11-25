@@ -32,23 +32,17 @@ public class TarefaService {
             tarefas = tarefaRepository.findByConcluida(concluida, sort);
         }
 
-        return tarefas.stream()
-                .map(tarefa -> toDto(tarefa))
-                .toList();
+        return tarefas.stream().map(this::toDto).toList();
     }
 
     public List<TarefaDTO> buscarAtrasadas() {
         LocalDate hoje = LocalDate.now();
         List<Tarefa> tarefasAtrasadas = tarefaRepository.findByDataPrazoBeforeAndConcluidaFalse(hoje);
-
-        return tarefasAtrasadas.stream()
-                .map(tarefa -> toDto(tarefa))
-                .toList();
+        return tarefasAtrasadas.stream().map(this::toDto).toList();
     }
 
     public Optional<TarefaDTO> buscarTarefaPorId(Long id) {
-        return tarefaRepository.findById(id)
-                .map(tarefa -> toDto(tarefa));
+        return tarefaRepository.findById(id).map(this::toDto);
     }
 
     public TarefaDTO criarTarefa(TarefaDTO tarefaDTO) {
@@ -64,14 +58,13 @@ public class TarefaService {
             tarefa.setConcluida(tarefaDTO.getConcluida());
             tarefa.setPrioridade(tarefaDTO.getPrioridade());
             tarefa.setDataPrazo(tarefaDTO.getDataPrazo());
-
             return Optional.of(toDto(tarefaRepository.save(tarefa)));
         }
         return Optional.empty();
     }
 
     public boolean deletarTarefa(Long id) {
-        if (tarefaRepository.existsById(id)){
+        if (tarefaRepository.existsById(id)) {
             tarefaRepository.deleteById(id);
             return true;
         }
@@ -82,24 +75,18 @@ public class TarefaService {
         long total = tarefaRepository.count();
         long concluidas = tarefaRepository.countByConcluida(true);
         long pendentes = tarefaRepository.countByConcluida(false);
-
         return new TarefaEstatisticasDTO(total, concluidas, pendentes);
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {
         return new TarefaDTO(
-                tarefa.getId(),
-                tarefa.getNome(),
-                tarefa.getPrioridade(),
-                tarefa.getConcluida(),
-                tarefa.getDataPrazo(),
-                tarefa.getDataCriacao()
+                tarefa.getId(), tarefa.getNome(), tarefa.getPrioridade(),
+                tarefa.getConcluida(), tarefa.getDataPrazo(), tarefa.getDataCriacao()
         );
     }
 
     private Tarefa toEntity(TarefaDTO tarefaDTO) {
-        Tarefa tarefa = new Tarefa(tarefaDTO.getNome(),
-                tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
+        Tarefa tarefa = new Tarefa(tarefaDTO.getNome(), tarefaDTO.getPrioridade(), tarefaDTO.getConcluida());
         tarefa.setDataPrazo(tarefaDTO.getDataPrazo());
         return tarefa;
     }

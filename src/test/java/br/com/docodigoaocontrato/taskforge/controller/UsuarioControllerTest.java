@@ -67,4 +67,19 @@ public class UsuarioControllerTest {
                 .andExpect(jsonPath("$.token").exists())
                 .andExpect(jsonPath("$.senha").doesNotExist());
     }
+
+    @Test
+    void deveRetornar400QuandoEmailForInvalido() throws Exception {
+        mockMvc.perform(post("/usuarios")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nome": "Usuario",
+                                    "email": "email.com",
+                                    "senha": "123456"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos.email").value("Email inválido"));
+    }
 }
