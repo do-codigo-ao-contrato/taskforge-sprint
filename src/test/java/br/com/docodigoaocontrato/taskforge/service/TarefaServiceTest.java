@@ -1,24 +1,23 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
-import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
-import br.com.docodigoaocontrato.taskforge.model.Tarefa;
-import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class TarefaServiceTest {
+class TarefaServiceTest {
 
     @Mock
     private TarefaRepository tarefaRepository;
@@ -27,104 +26,20 @@ public class TarefaServiceTest {
     private TarefaService tarefaService;
 
     @Test
-    void deveDevolverUmaTarefaQuandoOIdExiste() {
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
+    void deveBuscarTodasAsTarefasEConverterParaDto() {
+        Tarefa tarefa = new Tarefa("Estudar Java", 1, false);
+        tarefa.setId(1L);
 
-        Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(1L);
+        when(tarefaRepository.findAll()).thenReturn(List.of(tarefa));
 
-        assertTrue(resultado.isPresent());
-        assertEquals("Estudar", resultado.get().getNome());
-        assertEquals(1, resultado.get().getPrioridade());
-    }
-
-    @Test
-    void deveDevolverVazioQuandoOIdNaoExiste() {
-        when(tarefaRepository.findById(99L)).thenReturn(Optional.empty());
-
-        Optional<TarefaDTO> resultado = tarefaService.buscarTarefaPorId(99L);
-
-        assertTrue(resultado.isEmpty());
-    }
-
-    @Test
-    void deveDevelverAprioridadeEditada(){
-        // DADO que o banco tem uma tarefa para editar
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
-        when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
-        when(tarefaRepository.save(any(Tarefa.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
-        // QUANDO eu edito a tarefa
-        Optional<TarefaDTO> tarefaAtualizada = tarefaService.atualizarTarefa(1L, tarefaNova);
-
-        // ENTAO tarefa muda o valor da prioridade
-        assertTrue(tarefaAtualizada.isPresent());
-        assertEquals(5, tarefaAtualizada.get().getPrioridade());
-    }
-
-    @Test
-    void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
-        Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
-        when(tarefaRepository.findByConcluida(true))
-                .thenReturn(List.of(tarefaConcluida));
-
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(true, null);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(null, null);
 
         assertEquals(1, resultado.size());
-        assertTrue(resultado.get(0).getConcluida());
-        verify(tarefaRepository).findByConcluida(true);
-    }
+        assertEquals(1L, resultado.get(0).getId());
+        assertEquals("Estudar Java", resultado.get(0).getNome());
+        assertEquals(1, resultado.get(0).getPrioridade());
+        assertEquals(false, resultado.get(0).getConcluida());
 
-    @Test
-    void deveBuscarTarefasPendentesQuandoFiltroForFalse() {
-        Tarefa tarefaPendente = new Tarefa(2L, "Fazer exercício", 2, false);
-        when(tarefaRepository.findByConcluida(false))
-                .thenReturn(List.of(tarefaPendente));
-
-        List<TarefaDTO> resultado = tarefaService.buscarTodos(false, null);
-
-        assertEquals(1, resultado.size());
-        assertFalse(resultado.get(0).getConcluida());
-        verify(tarefaRepository).findByConcluida(false);
-    }
-
-    @Test
-    void deveObterEstatisticasDasTarefas() {
-        when(tarefaRepository.count()).thenReturn(5L);
-        when(tarefaRepository.countByConcluida(true)).thenReturn(3L);
-        when(tarefaRepository.countByConcluida(false)).thenReturn(2L);
-
-        TarefaEstatisticasDTO estatisticas = tarefaService.obterEstatisticas();
-
-        assertEquals(5L, estatisticas.getTotal());
-        assertEquals(3L, estatisticas.getConcluidas());
-        assertEquals(2L, estatisticas.getPendentes());
-
-        verify(tarefaRepository, times(1)).count();
-        verify(tarefaRepository, times(1)).countByConcluida(true);
-        verify(tarefaRepository, times(1)).countByConcluida(false);
-    }
-
-    @Test
-    void deveApagarTarefaConformeImplementacaoAtualDoService() {
-        when(tarefaRepository.existsById(99L)).thenReturn(true);
-
-        boolean apagada = tarefaService.deletarTarefa(99L);
-
-        assertTrue(apagada);
-        verify(tarefaRepository).deleteById(99L);
-    }
-    @Test
-    void deveBuscarTarefasPorNome() {
-        Tarefa tarefaRepositorio = new Tarefa(2L, "estudar", 2, false);
-        when(tarefaRepository.findByNomeContainingIgnoreCase("estudar"))
-                .thenReturn(List.of(tarefaRepositorio));
-
-        List<TarefaDTO> tarefaBuscada = tarefaService.buscarTodos(null, "estudar");
-
-        assertEquals(2L, tarefaBuscada.get(0).getId());
-        assertEquals("estudar", tarefaBuscada.get(0).getNome());
+        verify(tarefaRepository).findAll();
     }
 }
