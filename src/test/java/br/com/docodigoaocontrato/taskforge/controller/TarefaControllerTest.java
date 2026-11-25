@@ -229,4 +229,44 @@ public class TarefaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
     }
+
+    @Test
+    void deveRetornar400QuandoTipoDoCampoForInvalido() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                 {
+                                    "nome": "Estudar",
+                                    "prioridade": "abc",
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos").isEmpty())
+                .andExpect(jsonPath("$.mensagem").value("Corpo da requisição inválido: confira o formato" +
+                        " do JSON e os tipos dos campos"));
+    }
+
+    @Test
+    void deveRetornar400QuandoJsonEstiverQuebrado() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/tarefas")
+                        .header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                 {
+                                    "nome": "Estudar",
+                                    "prioridade": abc,
+                                    "concluida": false
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campos").isEmpty())
+                .andExpect(jsonPath("$.mensagem").value("Corpo da requisição inválido: confira o formato" +
+                        " do JSON e os tipos dos campos"));
+    }
 }
