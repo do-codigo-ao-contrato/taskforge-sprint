@@ -3,6 +3,7 @@ package br.com.docodigoaocontrato.taskforge.service;
 import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
+import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.Optional;
 public class ComentarioService {
 
     private final ComentarioRepository comentarioRepository;
+    private final TarefaRepository tarefaRepository;
 
-    public ComentarioService(ComentarioRepository comentarioRepository) {
+    public ComentarioService(ComentarioRepository comentarioRepository, TarefaRepository tarefaRepository) {
         this.comentarioRepository = comentarioRepository;
+        this.tarefaRepository = tarefaRepository;
     }
 
     public List<ComentarioDTO> listarTodos(String autor) {
@@ -35,9 +38,16 @@ public class ComentarioService {
                 .map(comentario -> toDto(comentario));
     }
 
-    public ComentarioDTO criarComentario(ComentarioDTO comentarioDTO) {
+    public Optional<ComentarioDTO> criarComentario(Long id, ComentarioDTO comentarioDTO) {
+        Optional<Tarefa> tarefa = tarefaRepository.findById(id);
+        if (tarefa.isEmpty()){
+            return Optional.empty();
+        }
+        Tarefa tarefaEncontrada = tarefa.get();
         Comentario comentario = toEntity(comentarioDTO);
-        return toDto(comentarioRepository.save(comentario));
+        comentario.setTarefa(tarefaEncontrada);
+        Comentario comentarioSalvo = comentarioRepository.save(comentario);
+        return Optional.of(toDto(comentarioSalvo));
     }
 
     public Optional<ComentarioDTO> atualizarComentario(Long id, ComentarioDTO comentarioDTO) {

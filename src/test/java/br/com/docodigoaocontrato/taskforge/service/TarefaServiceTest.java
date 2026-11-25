@@ -1,8 +1,11 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +17,9 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,10 +58,11 @@ public class TarefaServiceTest {
     @Test
     void deveDevelverAprioridadeEditada() {
         // DADO que o banco tem uma tarefa para editar
-        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false);
-        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false, LocalDateTime.now());
+        Tarefa tarefa = new Tarefa(1L, "Estudar", 1, false, new ArrayList<>());
+        TarefaDTO tarefaNova = new TarefaDTO(1L, "Estudar", 5, false,
+                new ArrayList<>(), LocalDateTime.now());
         when(tarefaRepository.findById(1L)).thenReturn(Optional.of(tarefa));
-        when(tarefaRepository.save(any(Tarefa.class)))
+        when(tarefaRepository.save(tarefa))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         // QUANDO eu edito a tarefa
@@ -71,8 +76,8 @@ public class TarefaServiceTest {
     @Test
     void deveBuscarTarefasConcluidasQuandoFiltroForTrue() {
         Tarefa tarefaConcluida = new Tarefa(1L, "Estudar", 1, true);
-        when(tarefaRepository.findByConcluida(true, null))
-                .thenReturn(new PageImpl<>(List.of(tarefaConcluida)));
+        when(tarefaRepository.findByConcluida(true))
+                .thenReturn((Page<Tarefa>) List.of(tarefaConcluida));
 
         Page<TarefaDTO> resultado = tarefaService.buscarTodos(true, null, null);
 
@@ -87,11 +92,11 @@ public class TarefaServiceTest {
         when(tarefaRepository.findByConcluida(false, null))
                 .thenReturn(new PageImpl<>(List.of(tarefaPendente)));
 
-        Page<TarefaDTO> resultado = tarefaService.buscarTodos(false, null, null);
+        List<TarefaDTO> resultado = tarefaService.buscarTodos(false);
 
-        assertEquals(1, resultado.getContent().size());
-        assertFalse(resultado.getContent().get(0).getConcluida());
-        verify(tarefaRepository).findByConcluida(false, null);
+        assertEquals(1, resultado.size());
+        assertFalse(resultado.get(0).getConcluida());
+        verify(tarefaRepository).findByConcluida(false);
     }
 
     @Test

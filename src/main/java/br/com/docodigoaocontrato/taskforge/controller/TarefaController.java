@@ -1,5 +1,6 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
 import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
 import br.com.docodigoaocontrato.taskforge.service.IaService;
@@ -35,6 +36,15 @@ public class TarefaController {
             @RequestParam(required = false) String busca,
             Pageable pageable) {
         return ResponseEntity.ok(tarefaService.buscarTodos(concluida, busca, pageable));
+    }
+
+    @GetMapping("/{id}/comentarios")
+    public ResponseEntity<List<ComentarioDTO>> buscarTarefaComComentarios(@PathVariable Long id) {
+        Optional<List<ComentarioDTO>> listaComentario = tarefaService.buscarTarefaComComentarios(id);
+        if (listaComentario.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(listaComentario.get());
     }
 
     @GetMapping("/{id}")
