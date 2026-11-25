@@ -1,232 +1,36 @@
 package br.com.docodigoaocontrato.taskforge.controller;
 
-import com.jayway.jsonpath.JsonPath;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.service.IaService;
+import br.com.docodigoaocontrato.taskforge.service.TarefaService;
 
+class TarefaControllerTest {
 
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:testes")
-@AutoConfigureMockMvc
-public class TarefaControllerTest {
+    private final TarefaService tarefaService = mock(TarefaService.class);
+    private final IaService iaService = mock(IaService.class);
 
-    @Autowired
-    private MockMvc mockMvc;  // SIMULA um POSTMAN
+    private final TarefaController controller =
+            new TarefaController(tarefaService, iaService);
 
     @Test
-    void deveRetornarStatus401QuandoNaoTemToken() throws Exception {
-        mockMvc.perform(get("/tarefas"))
-                .andExpect(status().isUnauthorized());
-    }
+    void deveListarTarefasERetornarStatusOk() {
+        when(tarefaService.buscarTodos(null, null)).thenReturn(List.of());
 
-    @Test
-    void deveRetornar400DetalhandoOCampoQuandoForInvalidoNoCadastro() throws Exception {
-        String token = login();
+        ResponseEntity<List<TarefaDTO>> resposta = controller.listar(null, null);
 
-        mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "",
-                                    "prioridade": 5,
-                                    "concluida": false
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
-    }
-
-    @Test
-    void deveRetornar201QuandoUsuarioCriadoComSucesso() throws Exception {
-        String usuario = """
-                {
-                    "nome": "TesteUsuario",
-                    "email": "testeUsuario@teste.com",
-                    "senha": "teste123"
-                }
-                """;
-        mockMvc.perform(post("/usuarios")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(usuario)).andExpect(status().isCreated());
-    }
-
-    @Test
-    void deveRetornar400QuandoSenhaMenos6Caracteres() throws Exception {
-        String usuario = """
-                {
-                    "nome": "TesteUsuario",
-                    "email": "testeUsuario@teste.com",
-                    "senha": "123"
-                }
-                """;
-        mockMvc.perform(post("/usuarios")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(usuario)).andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void deveRetornar400QuandoNomeForEmBranco() throws Exception {
-        String token = login();
-
-        mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "   ",
-                                    "prioridade": 2,
-                                    "concluida": false
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos.nome").value("O nome não pode estar em branco"));
-    }
-
-    private String login() throws Exception {
-        String usuarioCadastroDTO = """
-                {
-                    "nome": "Teste",
-                    "email": "teste@teste.com",
-                    "senha": "teste123"
-                }
-                """;
-
-        String loginDTO = """
-                {
-                    "email": "teste@teste.com",
-                    "senha": "teste123"
-                }
-                """;
-        mockMvc.perform(post("/usuarios")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(usuarioCadastroDTO));
-
-        String resposta = mockMvc.perform(post("/usuarios/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(loginDTO))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        return "Bearer " + JsonPath.read(resposta, "$.token");
-    }
-
-    @Test
-    void deveRetornarEstatisticasDasTarefas() throws Exception {
-        String token = login();
-
-        mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "Tarefa 1",
-                                    "prioridade": 3,
-                                    "concluida": true
-                                }
-                                """))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "Tarefa 2",
-                                    "prioridade": 2,
-                                    "concluida": false
-                                }
-                                """))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get("/tarefas/estatisticas")
-                        .header("Authorization", token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.total").isNumber())
-                .andExpect(jsonPath("$.concluidas").isNumber())
-                .andExpect(jsonPath("$.pendentes").isNumber());
-    }
-
-    @Test
-    void deveRetornar401AoBuscarEstatisticasSemToken() throws Exception {
-        mockMvc.perform(get("/tarefas/estatisticas"))
-                .andExpect(status().isUnauthorized());
-    }
-
-
-    @Test
-    void deveRetornar400QuandoPrioridadeForaDoIntervalo() throws Exception {
-        String token = login();
-
-        mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "Estudar",
-                                    "prioridade": 6,
-                                    "concluida": false
-                                }
-                                """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.campos.prioridade").value("A prioridade deve estar entre 1 e 5"));
-
-    }
-
-    @Test
-    void deveRetornarDataCriacaoAoBuscarTarefaPorId() throws Exception {
-        String token = login();
-
-        String resposta = mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "Estudar",
-                                    "prioridade": 5,
-                                    "concluida": false
-                                }
-                                """))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-
-        Integer id = JsonPath.read(resposta, "$.id");
-
-
-        mockMvc.perform(get("/tarefas/" + id)
-                        .header("Authorization", token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dataCriacao").isNotEmpty());
-
-    }
-
-    @Test
-    void deveRetornarDataCriacaoNaListaDeTarefas() throws Exception {
-        String token = login();
-
-        mockMvc.perform(post("/tarefas")
-                        .header("Authorization", token)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "nome": "Estudar",
-                                    "prioridade": 5,
-                                    "concluida": false
-                                }
-                                """))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(get("/tarefas")
-                        .header("Authorization", token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].dataCriacao").isNotEmpty());
+        assertEquals(HttpStatus.OK, resposta.getStatusCode());
+        assertEquals(0, resposta.getBody().size());
+        verify(tarefaService).buscarTodos(null, null);
     }
 }

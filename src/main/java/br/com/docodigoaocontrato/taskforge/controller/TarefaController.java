@@ -73,6 +73,17 @@ public class TarefaController {
         return ResponseEntity.status(HttpStatus.OK).body(tarefaAtualizada.get());
     }
 
+    @PatchMapping("/{id}/concluir")
+    public ResponseEntity<TarefaDTO> concluirTarefa(@PathVariable Long id) {
+        Optional<TarefaDTO> tarefaConcluida = tarefaService.concluirTarefa(id);
+
+        if (tarefaConcluida.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(tarefaConcluida.get());
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarTarefa(@PathVariable Long id) {
         if (!tarefaService.deletarTarefa(id)) {

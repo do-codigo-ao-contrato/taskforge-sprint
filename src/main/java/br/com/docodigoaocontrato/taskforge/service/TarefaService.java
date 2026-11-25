@@ -57,6 +57,14 @@ public class TarefaService {
         return Optional.empty();
     }
 
+    public Optional<TarefaDTO> concluirTarefa(Long id) {
+        return tarefaRepository.findById(id)
+                .map(tarefa -> {
+                    tarefa.setConcluida(true);
+                    return toDto(tarefaRepository.save(tarefa));
+                });
+    }
+
     public boolean deletarTarefa(Long id) {
         if (tarefaRepository.existsById(id)){
             tarefaRepository.deleteById(id);
