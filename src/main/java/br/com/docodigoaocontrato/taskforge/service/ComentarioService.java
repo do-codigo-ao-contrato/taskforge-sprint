@@ -1,13 +1,12 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-
 import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
 import br.com.docodigoaocontrato.taskforge.model.Comentario;
 import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ComentarioService {
@@ -18,8 +17,14 @@ public class ComentarioService {
         this.comentarioRepository = comentarioRepository;
     }
 
-    public List<ComentarioDTO> listarTodos() {
-        return comentarioRepository.findAll()
+    public List<ComentarioDTO> listarTodos(String autor) {
+        List<Comentario> comentarios;
+        if (autor == null) {
+            comentarios = comentarioRepository.findAll();
+        } else {
+            comentarios = comentarioRepository.findByAutorContainsIgnoreCase(autor);
+        }
+        return comentarios
                 .stream()
                 .map(comentario -> toDto(comentario))
                 .toList();
@@ -40,7 +45,6 @@ public class ComentarioService {
         if (comentarioRecuperado.isPresent()) {
             Comentario comentario = comentarioRecuperado.get();
             comentario.setDescricao(comentarioDTO.getDescricao());
-            comentario.setAutor(comentarioDTO.getAutor());
             return Optional.of(toDto(comentarioRepository.save(comentario)));
         }
         return Optional.empty();
