@@ -1,12 +1,15 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
-import br.com.docodigoaocontrato.taskforge.model.Tarefa;
-import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import br.com.docodigoaocontrato.taskforge.dto.TarefaDTO;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
+import br.com.docodigoaocontrato.taskforge.dto.TarefaEstatisticasDTO;
+import br.com.docodigoaocontrato.taskforge.model.Tarefa;
+import br.com.docodigoaocontrato.taskforge.repository.TarefaRepository;
 
 @Service
 public class TarefaService {
@@ -55,8 +58,19 @@ public class TarefaService {
     }
 
     public boolean deletarTarefa(Long id) {
-        tarefaRepository.deleteById(id);
-        return true;
+        if (tarefaRepository.existsById(id)){
+            tarefaRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public TarefaEstatisticasDTO obterEstatisticas() {
+        long total = tarefaRepository.count();
+        long concluidas = tarefaRepository.countByConcluida(true);
+        long pendentes = tarefaRepository.countByConcluida(false);
+
+        return new TarefaEstatisticasDTO(total, concluidas, pendentes);
     }
 
     private TarefaDTO toDto(Tarefa tarefa) {
