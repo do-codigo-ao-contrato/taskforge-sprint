@@ -29,13 +29,13 @@ public class ComentarioService {
         }
         return comentarios
                 .stream()
-                .map(comentario -> toDto(comentario))
+                .map(this::toDto)
                 .toList();
     }
 
     public Optional<ComentarioDTO> buscarPorId(Long id) {
         return comentarioRepository.findById(id)
-                .map(comentario -> toDto(comentario));
+                .map(this::toDto);
     }
 
     public Optional<ComentarioDTO> criarComentario(Long id, ComentarioDTO comentarioDTO) {
@@ -55,6 +55,7 @@ public class ComentarioService {
         if (comentarioRecuperado.isPresent()) {
             Comentario comentario = comentarioRecuperado.get();
             comentario.setDescricao(comentarioDTO.getDescricao());
+            comentario.setAutor(comentarioDTO.getAutor());
             return Optional.of(toDto(comentarioRepository.save(comentario)));
         }
         return Optional.empty();
@@ -69,12 +70,18 @@ public class ComentarioService {
     }
 
     private ComentarioDTO toDto(Comentario comentario) {
-        return new ComentarioDTO(comentario.getId(),
-                comentario.getDescricao(), comentario.getAutor());
+        return new ComentarioDTO(
+                comentario.getId(),
+                comentario.getDescricao(),
+                comentario.getAutor()
+        );
     }
 
     private Comentario toEntity(ComentarioDTO comentarioDTO) {
-        return new Comentario(comentarioDTO.getId(),
-                comentarioDTO.getDescricao(), comentarioDTO.getAutor());
+        return new Comentario(
+                null,
+                comentarioDTO.getDescricao(),
+                comentarioDTO.getAutor()
+        );
     }
 }
