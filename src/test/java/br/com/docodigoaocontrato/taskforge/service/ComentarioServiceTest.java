@@ -1,16 +1,15 @@
 package br.com.docodigoaocontrato.taskforge.service;
 
-import java.util.Optional;
-
+import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
+import br.com.docodigoaocontrato.taskforge.model.Comentario;
+import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import br.com.docodigoaocontrato.taskforge.dto.ComentarioDTO;
-import br.com.docodigoaocontrato.taskforge.model.Comentario;
-import br.com.docodigoaocontrato.taskforge.repository.ComentarioRepository;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
